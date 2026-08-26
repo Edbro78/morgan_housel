@@ -1,0 +1,17 @@
+# Local tooling and dependencies
+_babel/
+node_modules/
+
+# Debug captures
+_shots/
+_dom.err
+_dom.html
+_app.jsx
+tab0.png
+tab1.png
+tab2.png
+tab3.png
+_v0.png
+_v1.png
+_v2.png
+_v3.png

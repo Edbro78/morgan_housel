@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>17 nivåer av økonomisk frihet — Söderberg & Partners Wealth Management</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+<style>
+  :root {
+    --sp-navy:#002359; --sp-navy-ink:#12326E; --sp-navy-pressed:#074EB9;
+    --blue-main:#0A5EDC; --blue-50:#F3F7FD; --blue-100:#EEF5FF; --blue-200:#E6EFFB; --blue-400:#99BEF5;
+    --secondary-500:#8091AC;
+    --gray-25:#FCFCFD; --gray-50:#F9FAFB; --gray-100:#F2F4F7; --gray-200:#EAECF0; --gray-300:#D0D5DD; --gray-400:#98A2B3; --gray-500:#667085; --gray-600:#475467; --gray-700:#344054; --gray-900:#101828;
+    --blue-300:#B5CFF5; --secondary-800:#264472; --secondary-100:#ECEFF3;
+    --error-bg:#FEF3F2; --error-700:#B42318;
+    --warning-bg:#FFFAEB; --warning-700:#B54708;
+    --success-bg:#ECFDF3; --success-700:#067647;
+    --chart-blue:#0A5EDC; --chart-navy:#002359; --chart-violet:#9747FF; --chart-grid:#EAECF0;
+    --ring:rgba(10,94,220,0.24);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body, #root {
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    background: var(--gray-50); color: var(--sp-navy);
+    font-family: "Hanken Grotesk", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font-family: inherit; }
+  input[type=range] {
+    -webkit-appearance: none; appearance: none; width: 100%; height: 5px;
+    background: var(--gray-200); border-radius: 100px; outline: none; margin: 6px 0;
+  }
+  input[type=range]:focus { box-shadow: 0 0 0 3px var(--ring); }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+    background: #fff; border: 2px solid var(--blue-main); cursor: pointer;
+    transition: transform .15s ease-out;
+  }
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.12); }
+  input[type=range]::-moz-range-track {
+    height: 5px; background: var(--gray-200); border-radius: 100px; border: none;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 16px; height: 16px; border-radius: 50%; background: #fff;
+    border: 2px solid var(--blue-main); cursor: pointer;
+  }
+  @media (max-width: 1100px) {
+    .sliders-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  }
+  @media (max-width: 800px) {
+    html, body, #root { height: auto; overflow: auto; }
+    .hero-split { grid-template-columns: 1fr !important; }
+    .hero-right { border-left: none !important; padding-left: 0 !important; margin-left: 0 !important; border-top: 1px solid var(--gray-200); padding-top: 12px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+  .nd-chip:focus-visible, .nd-axis:focus-visible, .nd-nav:focus-visible {
+    outline: 2px solid var(--blue-main);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--ring);
+  }
+  .nd-grid { display: grid; gap: 1px; background: var(--gray-200); border: 1px solid var(--gray-200); border-radius: 12px; overflow: hidden; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+const nb = n => {
+  if (!Number.isFinite(n)) return "–";
+  return Math.round(n).toLocaleString("nb-NO").replace(/\u00a0/g, " ");
+};
+const kr = n => Number.isFinite(n) ? nb(n) + " kr" : "–";
+const mkr = n => {
+  if (!Number.isFinite(n)) return "–";
+  return Math.abs(n) >= 1e6
+    ? (n / 1e6).toFixed(Math.abs(n) >= 1e7 ? 1 : 2).replace(".", ",") + " mill."
+    : nb(n);
+};
+const pct = n => Number.isFinite(n) ? n.toFixed(0).replace(".", ",") + " %" : "–";
+const pct1 = n => Number.isFinite(n) ? n.toFixed(1).replace(".", ",") + " %" : "–";
+const yrs = n => {
+  if (!Number.isFinite(n) || n >= 100) return "Ubegrenset";
+  return n.toFixed(1).replace(".", ",") + " år";
+};
+const signedKr = n => {
+  if (!Number.isFinite(n)) return "–";
+  if (n > 0) return "+ " + kr(n);
+  if (n < 0) return "− " + kr(Math.abs(n));
+  return kr(0);
+};
+
+const R = [0, 0, 0, 0, 0, 1 / 12, 0.25, 0.5, 1, 2, 2, 8, 10, 20, 30, 60, 60];
+
+const LEVELS = [
+  { n: 0, tittel: "Økonomisk sårbarhet", badge: "Krise", kriterium: "Ingen inntekt, ingen midler",
+    beskrivelse: "Ingen inntekt og ingen likviditet. Husholdningen er avhengig av akutt nødhjelp for mat, bolig og strøm.",
+    nesteSteg: "Et sted å bo og en form for forsørgelse.",
+    p: { salary: 0, taxFree: 0, cost: 10000, assets: 0, debt: 0, rate: 5, liq: 0, prate: 5 } },
+  { n: 1, tittel: "Familieavhengig", badge: "Avhengig", kriterium: "Bor gratis, ingen egen inntekt",
+    beskrivelse: "Bor gratis hos slekt uten egen inntekt. Utgiftene bæres av andre, og all frihet er lånt.",
+    nesteSteg: "Egen, forutsigbar stønad eller ytelse.",
+    p: { salary: 0, taxFree: 0, cost: 10000, assets: 0, debt: 0, rate: 5, liq: 20000, prate: 5 } },
+  { n: 2, tittel: "Offentlig støtte", badge: "Stønad", kriterium: "Lever på ytelser",
+    beskrivelse: "Lever fullt ut på kommunal stønad eller NAV-ytelser. Forutsigbart, men uten handlingsrom.",
+    nesteSteg: "Egen arbeidsinntekt.",
+    p: { salary: 0, taxFree: 280000, cost: 22000, assets: 0, debt: 0, rate: 5, liq: 15000, prate: 5 } },
+  { n: 3, tittel: "Lavinntekt", badge: "Sårbar", kriterium: "Dekning under 70 %",
+    beskrivelse: "Arbeid, men inntekten dekker under 70 % av kostnadene uten subsidier. Hver uforutsett utgift blir gjeld.",
+    nesteSteg: "Inntekt som dekker de faste kostnadene.",
+    p: { salary: 420000, taxFree: 0, cost: 38000, assets: 2500000, debt: 2200000, rate: 5, liq: 10000, prate: 5 } },
+  { n: 4, tittel: "Hamsterhjulet", badge: "Lønn til lønn", kriterium: "Under 1 mnd rullebane",
+    beskrivelse: "Fast jobb og god lønn, men høy belåning og nesten ingen buffer. Kostnadene spiser hele inntekten — jobben er ikke valgfri.",
+    nesteSteg: "Én måneds rullebane uten lønn.",
+    p: { salary: 1500000, taxFree: 0, cost: 95000, assets: 12000000, debt: 10500000, rate: 5, liq: 25000, prate: 5 } },
+  { n: 5, tittel: "Liten buffer", badge: "1–3 mnd", kriterium: "≥ 1 mnd rullebane",
+    beskrivelse: "En liten buffer på plass. Bilen kan gå i stykker uten at det blir krise, men ikke to ganger.",
+    nesteSteg: "Tre måneders rullebane.",
+    p: { salary: 1500000, taxFree: 0, cost: 55000, assets: 6000000, debt: 4500000, rate: 5, liq: 130000, prate: 5 } },
+  { n: 6, tittel: "Trygg hverdag", badge: "3–6 mnd", kriterium: "≥ 3 mnd rullebane",
+    beskrivelse: "Tre til seks måneders kostnader i banken. Søvnen blir bedre, og korte perioder uten inntekt håndteres.",
+    nesteSteg: "Seks måneders rullebane.",
+    p: { salary: 1500000, taxFree: 0, cost: 55000, assets: 6000000, debt: 4500000, rate: 5, liq: 350000, prate: 5 } },
+  { n: 7, tittel: "Bærekraftig økonomi", badge: "6–12 mnd", kriterium: "≥ 6 mnd rullebane",
+    beskrivelse: "Seks til tolv måneders rullebane, ingen forbruksgjeld og pensjonssparingen løper. Økonomien tåler et år med støy.",
+    nesteSteg: "Tolv måneders rullebane og over 500 000 kr oppspart.",
+    p: { salary: 1500000, taxFree: 0, cost: 55000, assets: 6000000, debt: 4500000, rate: 5, liq: 700000, prate: 5 } },
+  { n: 8, tittel: "Begynnende frihet", badge: "Nei-kapasitet", kriterium: "≥ 1 år rullebane",
+    beskrivelse: "Over ett års rullebane og reell kapital i fond. Du kan si nei til en dårlig sjef, en dårlig kunde eller et dårlig oppdrag.",
+    nesteSteg: "To års rullebane.",
+    p: { salary: 1500000, taxFree: 0, cost: 55000, assets: 6000000, debt: 4500000, rate: 5, liq: 1300000, prate: 5 } },
+  { n: 9, tittel: "Fleksibel karriere", badge: "2–4 år", kriterium: "≥ 2 år rullebane",
+    beskrivelse: "To til fire års rullebane. Familien tåler 30–50 % frivillig lønnskutt for arbeid som gir bedre livskvalitet.",
+    nesteSteg: "Oppsparte midler større enn all gjeld.",
+    p: { salary: 1500000, taxFree: 0, cost: 55000, assets: 6000000, debt: 4500000, rate: 5, liq: 2400000, prate: 5 } },
+  { n: 10, tittel: "Bankuavhengig", badge: "Likvid gjeldfri", kriterium: "Oppspart ≥ gjeld",
+    beskrivelse: "Oppsparte midler overstiger all gjeld. Lånet kan innløses samme dag — renteøkninger er en beslutning, ikke en trussel.",
+    nesteSteg: "Åtte års rullebane uten lønn.",
+    p: { salary: 1500000, taxFree: 0, cost: 55000, assets: 6000000, debt: 4500000, rate: 5, liq: 4600000, prate: 5 } },
+  { n: 11, tittel: "Lang rullebane", badge: "8–10 år", kriterium: "≥ 8 år rullebane",
+    beskrivelse: "Åtte til ti år uten lønnsinntekt. Arbeid er blitt et valg, og tidshorisonten gjør risiko håndterbar.",
+    nesteSteg: "Passiv inntekt som dekker 50 % av kostnadene.",
+    p: { salary: 900000, taxFree: 0, cost: 60000, assets: 8000000, debt: 1500000, rate: 5, liq: 8500000, prate: 5 } },
+  { n: 12, tittel: "Halvveis FI", badge: "50–99 % dekket", kriterium: "Passiv dekning ≥ 50 %",
+    beskrivelse: "Avkastningen på oppsparte midler dekker halve husholdningen. Lønn er et supplement, ikke et fundament.",
+    nesteSteg: "100 % passiv dekning.",
+    p: { salary: 750000, taxFree: 0, cost: 60000, assets: 12000000, debt: 1000000, rate: 5, liq: 13000000, prate: 5 } },
+  { n: 13, tittel: "Full FI", badge: "100 % dekket", kriterium: "Passiv dekning ≥ 100 %",
+    beskrivelse: "Passiv inntekt dekker alle kostnader. Arbeid er hundre prosent frivillig, og kalenderen er din egen.",
+    nesteSteg: "150 % dekning inkludert hytte, reiser og bolighjelp.",
+    p: { salary: 0, taxFree: 0, cost: 60000, assets: 12000000, debt: 1000000, rate: 5, liq: 22000000, prate: 5 } },
+  { n: 14, tittel: "Luksus FI", badge: "> 150 %", kriterium: "Passiv dekning > 150 %",
+    beskrivelse: "Passiv dekning over 150 % med hytte, reiser og bolighjelp til barna inkludert i kostnadsbildet.",
+    nesteSteg: "300 % passiv dekning.",
+    p: { salary: 0, taxFree: 0, cost: 90000, assets: 12000000, debt: 0, rate: 5, liq: 45000000, prate: 5 } },
+  { n: 15, tittel: "Uavhengig makt", badge: "> 300 %", kriterium: "Passiv dekning ≥ 300 %",
+    beskrivelse: "Passiv dekning over 300 %. Økonomien er ugjennomtrengelig for ekstern støy — du kan si det du mener.",
+    nesteSteg: "En kapitalbase som vokser raskere enn den kan brukes.",
+    p: { salary: 0, taxFree: 0, cost: 80000, assets: 20000000, debt: 0, rate: 5, liq: 90000000, prate: 5 } },
+  { n: 16, tittel: "Generasjonsformue", badge: "Filantropi", kriterium: "≥ 300 % og over 100 mill. oppspart",
+    beskrivelse: "Avkastningen vokser mangedobbelt raskere enn det er praktisk mulig å bruke. Spørsmålet er ikke lenger forbruk, men forvaltning og formål.",
+    nesteSteg: "Toppen av stigen — herfra handler alt om hva kapitalen skal utrette.",
+    p: { salary: 0, taxFree: 0, cost: 100000, assets: 30000000, debt: 0, rate: 5, liq: 130000000, prate: 5 } },
+];
+
+const DEFAULTS = { salary: 0, taxFree: 0, cost: 10000, assets: 0, debt: 0, rate: 5, liq: 0, prate: 5 };
+
+function num(v) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
+function normalize(s) {
+  s = s || {};
+  return {
+    salary: num(s.salary), taxFree: num(s.taxFree), cost: num(s.cost),
+    assets: num(s.assets), debt: num(s.debt), rate: num(s.rate),
+    liq: num(s.liq), prate: num(s.prate),
+  };
+}
+function calc(s) {
+  const own = s.assets * 0.025;
+  const interest = s.debt * (s.rate / 100);
+  const living = s.cost * 12;
+  const totalCost = living + interest + own;
+  const passive = s.liq * (s.prate / 100);
+  const income = s.salary + s.taxFree + passive;
+  const surplus = (income - totalCost) / 12;
+  const gross = s.assets + s.liq;
+  const equity = gross === 0 ? 0 : ((gross - s.debt) / gross) * 100;
+  const ltv = gross === 0 ? 0 : (s.debt / gross) * 100;
+  const runway = totalCost === 0 ? (s.liq > 0 ? Infinity : 0) : s.liq / totalCost;
+  const passiveCov = totalCost === 0 ? (passive > 0 ? Infinity : 0) : (passive / totalCost) * 100;
+  const debtCov = s.debt > 0 ? (s.liq / s.debt) * 100 : Infinity;
+  const coverage = totalCost === 0 ? (income > 0 ? Infinity : 0) : (income / totalCost) * 100;
+  const salaryShare = income === 0 ? 0 : (s.salary / income) * 100;
+  const costOfSalary = s.salary === 0 ? (totalCost > 0 ? Infinity : 0) : (totalCost / s.salary) * 100;
+  const costOfIncome = income === 0 ? (totalCost > 0 ? Infinity : 0) : (totalCost / income) * 100;
+  const ownShare = income === 0 ? 0 : (own / income) * 100;
+  const interestShare = income === 0 ? 0 : (interest / income) * 100;
+  const passiveShare = income === 0 ? 0 : (passive / income) * 100;
+  return {
+    own, interest, living, totalCost, passive, income, surplus, gross, equity, ltv,
+    runway, passiveCov, debtCov, coverage, salaryShare, costOfSalary, costOfIncome,
+    ownShare, interestShare, passiveShare,
+  };
+}
+function horizon1(s, c) {
+  let bal = s.liq, m = 0;
+  const fixed = s.cost + (c.interest + c.own) / 12;
+  while (bal > 0 && m < 1200) {
+    bal += bal * (s.prate / 100) / 12 - fixed;
+    m++;
+  }
+  return m >= 1200 ? 100 : m / 12;
+}
+function horizon2(c) {
+  if (c.totalCost <= 0) return c.passive > 0 ? 100 : 0;
+  return c.passive >= c.totalCost ? 100 : c.passive / c.totalCost;
+}
+function horizon3(s) {
+  let bal = Math.max(0, s.assets + s.liq - s.debt), m = 0;
+  while (bal > 0 && m < 1200) {
+    bal += bal * (s.prate / 100) / 12 - (s.cost + bal * 0.025 / 12);
+    m++;
+  }
+  return m >= 1200 ? 100 : m / 12;
+}
+function evaluate(s, c) {
+  if (c.income === 0 && s.liq === 0) return 0;
+  if (s.salary === 0 && s.taxFree === 0 && s.assets === 0 && s.liq < 1e5) return 1;
+  if (c.passiveCov >= 300) return s.liq >= 1e8 ? 16 : 15;
+  if (c.passiveCov > 150) return 14;
+  if (c.passiveCov >= 100) return 13;
+  if (c.passiveCov >= 50) return 12;
+  if (c.runway >= 8) return 11;
+  if (s.salary === 0 && s.taxFree > 0) return 2;
+  if (s.salary > 0 && c.coverage < 70) return 3;
+  if (c.runway >= 2) return (s.debt > 0 && c.debtCov < 100) ? 9 : 10;
+  if (c.runway >= 1 && s.liq >= 500000) return 8;
+  if (c.runway >= 0.5) return 7;
+  if (c.runway >= 0.25) return 6;
+  if (c.runway >= 1 / 12) return 5;
+  return 4;
+}
+function clamp01(x) {
+  if (!Number.isFinite(x)) return x === Infinity ? 1 : 0;
+  return Math.max(0, Math.min(1, x));
+}
+function progress(lvl, c) {
+  if (lvl <= 3) return clamp01(c.coverage / 100);
+  if (lvl === 9) return clamp01((c.debtCov === Infinity ? 100 : c.debtCov) / 100);
+  if (lvl >= 11) {
+    if (lvl >= 16) return 1;
+    const floors = { 11: 0, 12: 50, 13: 100, 14: 150, 15: 300 };
+    const ceils = { 11: 50, 12: 100, 13: 150, 14: 300, 15: 300 };
+    const lo = floors[lvl], hi = ceils[lvl];
+    if (hi === lo) return c.passiveCov >= hi ? 1 : 0;
+    return clamp01((c.passiveCov - lo) / (hi - lo));
+  }
+  const lo = R[lvl], hi = R[lvl + 1];
+  if (hi === lo) return (c.runway === Infinity || c.runway >= hi) ? 1 : 0;
+  const rw = c.runway === Infinity ? 100 : c.runway;
+  return clamp01((rw - lo) / (hi - lo));
+}
+function nextNeed(s, c, lvl) {
+  if (lvl >= 16) return 0;
+  if (lvl < 11) return R[lvl + 1] * c.totalCost;
+  const k = [0.5, 1.0, 1.5, 3.0, 3.0][lvl - 11];
+  const r = s.prate / 100;
+  if (r === 0) return Infinity;
+  return k * c.totalCost / r;
+}
+function monthlyCostForNext(s, c, lvl) {
+  if (lvl >= 16) return null;
+  let maxTotal;
+  if (lvl <= 3) {
+    const target = lvl === 3 ? 0.7 : 1;
+    maxTotal = target === 0 ? 0 : c.income / target;
+  } else if (lvl < 11) {
+    const rn = R[lvl + 1];
+    if (!(rn > 0)) return null;
+    maxTotal = s.liq / rn;
+  } else {
+    const k = [0.5, 1.0, 1.5, 3.0, 3.0][lvl - 11];
+    if (!(c.passive > 0) || !(k > 0)) return null;
+    maxTotal = c.passive / k;
+  }
+  return (maxTotal - c.interest - c.own) / 12;
+}
+
+const TABS = [
+  { id: "forside", icon: "home-alt-2", label: "Forside" },
+  { id: 0, icon: "slider-alt", label: "Kundens økonomi" },
+  { id: 1, icon: "pie-chart-alt-2", label: "Kostnader og inntekt" },
+  { id: 2, icon: "table", label: "Kriteriematrise" },
+  { id: 3, icon: "target-lock", label: "Status og anbefalinger" },
+  { id: 4, icon: "stats", label: "Normalfordeling" },
+];
+const QUICK = [4, 7, 10, 12, 13];
+
+const card = (extra) => Object.assign({
+  background: "#fff", border: "1px solid var(--gray-200)", borderRadius: 12, padding: 16,
+}, extra || {});
+const numStyle = {
+  fontWeight: 600, letterSpacing: "-.02em", fontVariantNumeric: "tabular-nums", color: "var(--sp-navy)",
+};
+function Ico({ name, size = 17, color, style }) {
+  return <i className={"bx bx-" + name} style={Object.assign({ fontSize: size, color, lineHeight: 1 }, style || {})} />;
+}
+function Eyebrow({ children, color = "var(--gray-500)" }) {
+  return (
+    <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: ".08em", textTransform: "uppercase", color }}>
+      {children}
+    </div>
+  );
+}
+function Btn({ children, primary, onClick, style }) {
+  const [h, setH] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setH(true)}
+      onMouseLeave={() => setH(false)}
+      style={Object.assign({
+        fontFamily: "inherit", fontWeight: 600, fontSize: 13, cursor: "pointer",
+        borderRadius: 8, padding: "6px 12px", lineHeight: 1.3, textAlign: "left",
+        transition: "background .15s ease-out, border-color .15s ease-out, color .15s ease-out",
+        background: primary ? (h ? "var(--sp-navy-pressed)" : "var(--blue-main)") : (h ? "var(--gray-50)" : "#fff"),
+        color: primary ? "#fff" : "var(--sp-navy)",
+        border: primary ? "1px solid transparent" : "1px solid var(--gray-300)",
+      }, style || {})}
+    >{children}</button>
+  );
+}
+
+function RangeField({ label, value, min, max, step, hint, format, onChange }) {
+  return (
+    <div style={{ borderTop: "1px solid var(--gray-200)", paddingTop: 8 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) auto", columnGap: 12, alignItems: "start", marginBottom: 2 }}>
+        <span style={{ fontSize: 13, fontWeight: 500, color: "var(--sp-navy)", lineHeight: 1.3, whiteSpace: "pre-line" }}>{label}</span>
+        <span style={Object.assign({ fontSize: 15, whiteSpace: "nowrap", textAlign: "right" }, numStyle)}>{format(value)}</span>
+      </div>
+      <input type="range" min={min} max={max} step={step} value={value}
+        onChange={e => onChange(Number(e.target.value))} />
+      {hint ? <div style={{ fontSize: 11, color: "var(--gray-500)", minHeight: 16, lineHeight: 1.3 }}>{hint}</div> : null}
+    </div>
+  );
+}
+
+function Kpi({ icon, label, value, sub, valueColor }) {
+  return (
+    <div style={card({ padding: 14 })}>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12, color: "var(--gray-500)", minHeight: 18 }}>
+        <Ico name={icon} size={15} /> {label}
+      </div>
+      <div style={Object.assign({ fontSize: 22, margin: "4px 0 2px", lineHeight: 1.15 }, numStyle, { color: valueColor || "var(--sp-navy)" })}>
+        {value}
+      </div>
+      <div style={{ fontSize: 12, color: "var(--gray-500)", minHeight: 16, lineHeight: 1.3 }}>{sub}</div>
+    </div>
+  );
+}
+
+function Hero({ L, prog }) {
+  return (
+    <div className="hero-split" style={card({ padding: "12px 18px", display: "grid", gridTemplateColumns: "minmax(280px, 1.35fr) minmax(240px, 1fr)", gap: 24, alignItems: "center" })}>
+      <div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, flexWrap: "wrap" }}>
+          <Eyebrow color="var(--blue-main)">Familiens beregnede nivå</Eyebrow>
+          <span style={{ background: "var(--blue-100)", color: "var(--blue-main)", fontSize: 12, fontWeight: 500, padding: "3px 10px", borderRadius: 100 }}>{L.badge}</span>
+        </div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
+          <div style={Object.assign({ fontSize: 36, lineHeight: 1.1 }, numStyle)}>Nivå {L.n}</div>
+          <div style={{ fontSize: 22, fontWeight: 500, letterSpacing: "-.01em", color: "var(--sp-navy)" }}>{L.tittel}</div>
+        </div>
+        <p style={{ fontSize: 14, lineHeight: 1.4, maxWidth: "56ch", textWrap: "pretty", color: "var(--sp-navy)", margin: "6px 0 0" }}>{L.beskrivelse}</p>
+      </div>
+      <div className="hero-right" style={{ borderLeft: "1px solid var(--gray-200)", paddingLeft: 24, marginLeft: -8 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, marginBottom: 8 }}>
+          <div style={{ fontSize: 14, fontWeight: 500, color: "var(--sp-navy)" }}>Vei mot neste nivå</div>
+          <div style={Object.assign({ fontSize: 20 }, numStyle)}>{pct(prog * 100)}</div>
+        </div>
+        <div style={{ height: 8, background: "var(--gray-100)", borderRadius: 100, overflow: "hidden" }}>
+          <div style={{ width: (prog * 100) + "%", height: "100%", background: "var(--blue-main)", borderRadius: 100, transition: "width .3s ease-out" }} />
+        </div>
+        <div style={{ marginTop: 8, fontSize: 13, color: "var(--gray-600)", lineHeight: 1.4 }}>
+          Neste steg — {L.nesteSteg}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Footnote() {
+  return (
+    <div style={{ background: "var(--blue-50)", border: "1px solid var(--blue-200)", borderRadius: 12, padding: "8px 14px", display: "flex", gap: 10, alignItems: "flex-start", flex: "none" }}>
+      <Ico name="book-open" size={16} color="var(--blue-main)" style={{ marginTop: 1, flex: "none" }} />
+      <p style={{ margin: 0, fontSize: 12, lineHeight: 1.4, color: "var(--sp-navy)" }}>
+        Modellen bruker 2,5 %-regelen for årlig eierkostnad på brutto eiendeler, faktisk rentekostnad på gjeld, og oppsparte midler som grunnlag for både passiv inntekt og rullebane. Passiv inntekt beregnes som oppsparte midler × avkastning — 20 mill. kr til 5 % gir 1 mill. kr brutto per år. Illustrasjon, ikke finansiell rådgivning.
+      </p>
+    </div>
+  );
+}
+
+function TabForside({ onStart, loadLevel }) {
+  const zones = [
+    { t: "Under 1 md. rullebane", from: 0, to: 4, bg: "var(--error-bg)", fg: "var(--error-700)" },
+    { t: "Buffer og rullebane", from: 5, to: 9, bg: "var(--blue-100)", fg: "var(--blue-main)" },
+    { t: "Kapitaldrevet frihet", from: 10, to: 16, bg: "var(--secondary-100)", fg: "var(--secondary-800)" },
+  ];
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20, minHeight: 0, flex: 1 }}>
+      <div style={card({ padding: "28px 32px", display: "flex", justifyContent: "space-between", gap: 24, flexWrap: "wrap", alignItems: "flex-end" })}>
+        <div style={{ maxWidth: 720 }}>
+          <h1 style={{ margin: "0 0 10px", fontSize: 28, fontWeight: 500, letterSpacing: "-.01em", lineHeight: 1.2 }}>Morgan Housel's 17 nivåer av økonomisk frihet</h1>
+          <p style={{ margin: 0, fontSize: 15, color: "var(--gray-600)", lineHeight: 1.55 }}>
+            Frihet måles i rullebane — likvide midler delt på månedlig nødvendig utgang — ikke i nettoformue. Modellen plasserer husholdningen på ett av 17 nivåer, fra økonomisk sårbarhet til generasjonsformue.
+          </p>
+        </div>
+        <Btn primary onClick={onStart} style={{ padding: "10px 16px", flex: "none" }}>Gå til kundens økonomi</Btn>
+      </div>
+      {zones.map(z => (
+        <div key={z.t}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+            <span style={{ display: "inline-block", background: z.bg, color: z.fg, fontSize: 12, fontWeight: 500, padding: "4px 10px", borderRadius: 100 }}>{z.t}</span>
+            <span style={{ fontSize: 12, color: "var(--gray-500)" }}>Nivå {z.from}–{z.to}</span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 8 }}>
+            {LEVELS.filter(L => L.n >= z.from && L.n <= z.to).map(L => (
+              <button key={L.n} type="button" onClick={() => { loadLevel(L.n); onStart(); }}
+                style={Object.assign(card({ padding: 14, textAlign: "left", cursor: "pointer" }), { fontFamily: "inherit", display: "block", width: "100%" })}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "baseline" }}>
+                  <span style={Object.assign({ fontSize: 18 }, numStyle)}>Nivå {L.n}</span>
+                  <span style={{ fontSize: 11, fontWeight: 500, color: "var(--gray-500)" }}>{L.badge}</span>
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 500, margin: "4px 0 2px" }}>{L.tittel}</div>
+                <div style={{ fontSize: 12, color: "var(--gray-500)", lineHeight: 1.35 }}>{L.kriterium}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TabEconomy({ s, c, lvl, setField, loadLevel }) {
+  const fields = [
+    { key: "salary", label: "Brutto lønnsinntekt\n(årlig)", min: 0, max: 5000000, step: 50000, format: kr },
+    { key: "cost", label: "Månedlige kostnader\nex. renter og avdrag", min: 10000, max: 200000, step: 1000, format: kr, hint: kr(s.cost * 12) + " per år i livsopphold" },
+    { key: "liq", label: "Oppsparte midler\n(bank, fond, aksjer)", min: 0, max: 150000000, step: 250000, format: kr, hint: "Gir " + kr(c.passive) + " i passiv inntekt per år" },
+    { key: "prate", label: "Forventet avkastning\npå oppsparte midler", min: 0, max: 12, step: 0.5, format: v => pct1(v), hint: kr(s.liq) + " × " + pct1(s.prate).replace(" %", "") + " % = " + kr(c.passive) },
+    { key: "assets", label: "Øvrige eiendeler brutto\n(bolig, hytte, bil)", min: 0, max: 50000000, step: 250000, format: kr, hint: "Eierkostnad 2,5 %: " + kr(c.own) + " per år" },
+    { key: "debt", label: "Total gjeld", min: 0, max: 20000000, step: 100000, format: kr, hint: "Rentekostnad: " + kr(c.interest) + " per år" },
+    { key: "rate", label: "Lånerente", min: 0, max: 10, step: 0.1, format: v => pct1(v), hint: "Endrer rentekostnaden direkte" },
+    { key: "taxFree", label: "Skattefrie / andre inntekter\n(årlig)", min: 0, max: 1000000, step: 10000, format: kr, hint: "Netto, utenfor lønn" },
+  ];
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6, minHeight: 0, flex: 1 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 10 }}>
+        <Eyebrow>Hurtigvalg</Eyebrow>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {QUICK.map(n => (
+            <Btn key={n} primary={lvl === n} onClick={() => loadLevel(n)}>
+              {LEVELS[n].tittel} (nivå {n})
+            </Btn>
+          ))}
+        </div>
+      </div>
+      <div style={card({ padding: 16 })}>
+        <div style={{ fontSize: 16, fontWeight: 500, letterSpacing: "-.01em" }}>Kundens økonomi</div>
+        <div style={{ fontSize: 12, color: "var(--gray-500)", margin: "2px 0 4px" }}>Alle beløp i NOK. Passiv inntekt beregnes som avkastning på oppsparte midler.</div>
+        <div className="sliders-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", columnGap: 24, rowGap: 4 }}>
+          {fields.map(f => (
+            <RangeField key={f.key} {...f} value={s[f.key]} onChange={v => setField(f.key, v)} />
+          ))}
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 10, marginTop: 12 }}>
+        <Kpi icon="wallet" label="Månedlig overskudd" value={signedKr(c.surplus)}
+          valueColor={c.surplus > 0 ? "var(--success-700)" : c.surplus < 0 ? "var(--error-700)" : "var(--sp-navy)"}
+          sub={c.surplus >= 0 ? "Etter alle årlige kostnader" : "Inntekten dekker ikke kostnadene"} />
+        <Kpi icon="trending-up" label="Passiv inntekt per år" value={kr(c.passive)}
+          sub={"Dekker " + pct(c.passiveCov) + " av totale kostnader"} />
+        <Kpi icon="receipt" label="Totale årlige kostnader" value={kr(c.totalCost)}
+          sub={kr(c.totalCost / 12) + " per måned"} />
+        <Kpi icon="time-five" label="Rullebane oppsparte midler" value={yrs(horizon1(s, c))}
+          sub="Uten lønn, med fallende passiv inntekt" />
+      </div>
+    </div>
+  );
+}
+
+function Doughnut({ living, interest, own, total }) {
+  const r = 68, C = 2 * Math.PI * r, sw = 40;
+  const parts = [
+    { v: Math.max(0, living), color: "var(--chart-blue)", label: "Livsopphold" },
+    { v: Math.max(0, interest), color: "var(--chart-navy)", label: "Rentekostnad" },
+    { v: Math.max(0, own), color: "var(--blue-400)", label: "Eierkostnad 2,5 %" },
+  ];
+  const sum = parts.reduce((a, p) => a + p.v, 0) || 1;
+  let acc = 0;
+  return (
+    <div style={{ display: "flex", gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
+      <div style={{ flex: "none", width: 169 }}>
+        <svg width="169" height="169" viewBox="0 0 180 180" style={{ transform: "rotate(-90deg)", display: "block" }}>
+          <circle cx="90" cy="90" r={r} fill="none" stroke="var(--gray-100)" strokeWidth={sw} />
+          {parts.map((p, i) => {
+            const dash = (p.v / sum) * C;
+            const el = (
+              <circle key={i} cx="90" cy="90" r={r} fill="none" stroke={p.color} strokeWidth={sw}
+                strokeDasharray={dash + " " + (C - dash)} strokeDashoffset={-acc}
+                strokeLinecap="butt" />
+            );
+            acc += dash;
+            return el;
+          })}
+        </svg>
+        <div style={{ marginTop: 12, textAlign: "center" }}>
+          <div style={{ fontSize: 11, color: "var(--gray-500)", fontWeight: 600, letterSpacing: ".06em", textTransform: "uppercase" }}>Totalt per år</div>
+          <div style={Object.assign({ fontSize: 18, marginTop: 2 }, numStyle)}>{kr(total)}</div>
+        </div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12, minWidth: 220, flex: 1, paddingTop: 8 }}>
+        {parts.map(p => (
+          <div key={p.label} style={{ display: "grid", gridTemplateColumns: "12px 1fr auto auto", gap: 10, alignItems: "center" }}>
+            <span style={{ width: 12, height: 12, borderRadius: "50%", background: p.color }} />
+            <span style={{ fontSize: 14, color: "var(--sp-navy)" }}>{p.label}</span>
+            <span style={Object.assign({ fontSize: 15 }, numStyle)}>{kr(p.v)}</span>
+            <span style={{ fontSize: 13, color: "var(--gray-500)", minWidth: 48, textAlign: "right" }}>{pct((p.v / sum) * 100)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function BarChart({ s, c }) {
+  const bars = [
+    { label: "Lønn og andre inntekter", v: s.salary + s.taxFree, color: "var(--chart-blue)" },
+    { label: "Passiv inntekt", v: c.passive, color: "var(--blue-400)" },
+    { label: "Totale inntekter", v: c.income, color: "var(--chart-navy)" },
+    { label: "Totale kostnader", v: c.totalCost, color: "var(--secondary-500)" },
+  ];
+  const max = Math.max.apply(null, bars.map(b => b.v).concat([1]));
+  const covColor = c.coverage >= 100 ? "var(--success-700)" : c.coverage < 70 ? "var(--error-700)" : "var(--warning-700)";
+  return (
+    <div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, alignItems: "end", height: 119 }}>
+        {bars.map(b => {
+          const h = Math.max(4, (Math.max(0, b.v) / max) * 100);
+          return (
+            <div key={b.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "flex-end", minWidth: 0 }}>
+              <div style={Object.assign({ fontSize: 12, marginBottom: 6, textAlign: "center", whiteSpace: "nowrap" }, numStyle)}>{mkr(b.v)}</div>
+              <div style={{ width: "100%", maxWidth: 72, height: h, background: b.color, borderRadius: "6px 6px 2px 2px", transition: "height .3s ease-out" }} />
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginTop: 10 }}>
+        {bars.map(b => (
+          <div key={b.label} style={{ fontSize: 12, color: "var(--gray-500)", textAlign: "center", lineHeight: 1.35 }}>{b.label}</div>
+        ))}
+      </div>
+      <div style={{ marginTop: 14, paddingTop: 10, borderTop: "1px solid var(--gray-100)", display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
+        <span style={{ fontSize: 14, color: "var(--gray-600)" }}>Dekningsgrad — totale inntekter mot totale kostnader</span>
+        <span style={Object.assign({ fontSize: 18, color: covColor }, numStyle)}>{pct(c.coverage)}</span>
+      </div>
+    </div>
+  );
+}
+
+function Metric({ label, value, sub, color }) {
+  return (
+    <div style={{ padding: 12, border: "1px solid var(--gray-100)", minHeight: 88 }}>
+      <div style={{ fontSize: 12, color: "var(--gray-500)", minHeight: 18 }}>{label}</div>
+      <div style={Object.assign({ fontSize: 20, margin: "2px 0 2px", color: color || "var(--sp-navy)" }, numStyle)}>{value}</div>
+      <div style={{ fontSize: 11, color: "var(--gray-500)", minHeight: 16, lineHeight: 1.3 }}>{sub}</div>
+    </div>
+  );
+}
+
+function TabCosts({ s, c }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 0, flex: 1 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))", gap: 10 }}>
+        <div style={card({ padding: 14 })}>
+          <div style={{ fontSize: 15, fontWeight: 500, letterSpacing: "-.01em", marginBottom: 8 }}>Sammensetning av totale årlige kostnader</div>
+          <Doughnut living={c.living} interest={c.interest} own={c.own} total={c.totalCost} />
+        </div>
+        <div style={card({ padding: 14 })}>
+          <div style={{ fontSize: 15, fontWeight: 500, letterSpacing: "-.01em", marginBottom: 4 }}>Inntekt mot totale årlige kostnader</div>
+          <BarChart s={s} c={c} />
+        </div>
+      </div>
+      <div style={card({ padding: 0, overflow: "hidden" })}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))" }}>
+          <Metric label="Egenkapitalandel" value={pct(c.equity)} sub={kr(c.gross - s.debt) + " av " + kr(c.gross)} />
+          <Metric label="Gjeldsgrad av brutto eiendeler" value={s.debt === 0 ? "Gjeldfri" : pct(c.ltv)} sub={kr(s.debt) + " i gjeld"} />
+          <Metric label="Lønnsinntekt i % av totale inntekter" value={pct(c.salaryShare)}
+            sub={c.salaryShare > 80 ? "Høy avhengighet av lønn" : "Lønnens andel av inntektene"} />
+          <Metric label="Passiv inntekt i % av totale inntekter" value={pct(c.passiveShare)} sub="Avkastning på oppsparte midler" />
+          <Metric label="Kostnader i % av lønnsinntekt" value={s.salary === 0 ? "Ingen lønn" : pct(c.costOfSalary)}
+            color={!Number.isFinite(c.costOfSalary) ? undefined : (c.costOfSalary > 100 ? "var(--error-700)" : "var(--success-700)")}
+            sub="Under 100 % betyr at lønnen bærer kostnadene" />
+          <Metric label="Kostnader i % av totale inntekter" value={pct(c.costOfIncome)} sub="Samlet dekning inkludert passiv inntekt" />
+          <Metric label="Eierkostnad i % av totale inntekter" value={pct(c.ownShare)}
+            color={c.ownShare > 25 ? "var(--warning-700)" : undefined}
+            sub="2,5 % av brutto eiendeler" />
+          <Metric label="Rentekostnad i % av totale inntekter" value={pct(c.interestShare)}
+            color={c.interestShare > 25 ? "var(--warning-700)" : undefined}
+            sub={s.debt === 0 ? "Ingen gjeld" : "Faktisk rente på total gjeld"} />
+          <Metric label="Passiv dekningsgrad av kostnader" value={pct(c.passiveCov)} sub="100 % betyr full økonomisk frihet" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TabMatrix({ s, c, lvl, loadLevel }) {
+  const [hover, setHover] = useState(null);
+  const h1 = horizon1(s, c), h2 = horizon2(c), h3 = horizon3(s);
+  const cards = [
+    { n: 1, t: "Kun oppsparte midler", v: h1,
+      exp: "Lønn bortfaller, og du lever av oppsparte midler. Passiv inntekt faller gradvis bort etter hvert som midlene tappes ned.",
+      pre: "Bolig, hytte og gjeld beholdes — eierkostnad " + kr(c.own) + " og renter " + kr(c.interest) + " løper videre." },
+    { n: 2, t: "Kun passive inntekter", v: h2,
+      exp: h2 >= 100
+        ? "Passiv inntekt dekker alle faste kostnader og livsopphold uten å tære på kapitalen."
+        : "Passiv inntekt alene betaler " + pct(c.passiveCov) + " av et års kostnader — resten må dekkes av lønn eller kapital.",
+      pre: "Kapitalen røres ikke så lenge avkastningen bærer kostnadene." },
+    { n: 3, t: "Alle eiendeler selges", v: h3,
+      exp: "Du slutter å jobbe og lever av egenkapitalen: eiendelene selges, gjelden innløses, og du bruker pengene til det er tomt.",
+      pre: "Netto egenkapital " + kr(Math.max(0, s.assets + s.liq - s.debt)) + ". Eierkostnad og passiv inntekt faller i takt med kapitalen." },
+  ];
+  const th = { fontSize: 11, fontWeight: 600, color: "var(--gray-500)", textAlign: "right", padding: "6px 10px", whiteSpace: "nowrap" };
+  const td = { fontSize: 12, padding: "5px 10px", borderTop: "1px solid var(--gray-100)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" };
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 0, flex: 1 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 10, flex: "none" }}>
+        {cards.map(x => (
+          <div key={x.n} style={card({ padding: 14 })}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+              <span style={{ width: 22, height: 22, borderRadius: "50%", background: "var(--blue-100)", color: "var(--blue-main)", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 600 }}>{x.n}</span>
+              <div style={{ fontSize: 14, fontWeight: 500 }}>{x.t}</div>
+            </div>
+            <div style={Object.assign({ fontSize: 28, lineHeight: 1.1, margin: "4px 0 6px" }, numStyle)}>{yrs(x.v)}</div>
+            <p style={{ fontSize: 12, lineHeight: 1.4, color: "var(--gray-600)", margin: "0 0 8px" }}>{x.exp}</p>
+            <div style={{ borderTop: "1px solid var(--gray-200)", paddingTop: 8, fontSize: 12, color: "var(--gray-500)", lineHeight: 1.35 }}>{x.pre}</div>
+          </div>
+        ))}
+      </div>
+      <div style={card({ padding: 0, overflow: "hidden", flex: 1, minHeight: 0, display: "flex", flexDirection: "column" })}>
+        <div style={{ overflow: "auto", flex: 1 }}>
+          <table style={{ width: "100%", minWidth: 1000, borderCollapse: "collapse" }}>
+            <thead>
+              <tr>
+                <th style={Object.assign({}, th, { textAlign: "left" })}>Nivå</th>
+                <th style={Object.assign({}, th, { textAlign: "left" })}>Kriterium</th>
+                <th style={th}>1</th>
+                <th style={th}>Oppsparte midler</th>
+                <th style={th}>2</th>
+                <th style={th}>Kun passiv inntekt</th>
+                <th style={th}>3</th>
+                <th style={th}>Alle eiendeler</th>
+                <th style={th}>Gjeldsgrad</th>
+                <th style={th}>Passiv dekning</th>
+              </tr>
+            </thead>
+            <tbody>
+              {LEVELS.map(L => {
+                const ns = normalize(L.p);
+                const nc = calc(ns);
+                const active = lvl === L.n;
+                const hot = hover === L.n;
+                const bg = active ? "var(--blue-50)" : hot ? "var(--gray-50)" : "#fff";
+                return (
+                  <tr key={L.n}
+                    onClick={() => loadLevel(L.n)}
+                    onMouseEnter={() => setHover(L.n)}
+                    onMouseLeave={() => setHover(null)}
+                    style={{ background: bg, cursor: "pointer" }}>
+                    <td style={Object.assign({}, td, { fontWeight: active ? 600 : 500, color: active ? "var(--blue-main)" : "var(--sp-navy)", textAlign: "left" })}>
+                      {L.n} · {L.tittel}
+                    </td>
+                    <td style={Object.assign({}, td, { textAlign: "left", color: "var(--gray-600)", whiteSpace: "normal" })}>{L.kriterium}</td>
+                    <td style={Object.assign({}, td, { textAlign: "right" })}>{yrs(horizon1(ns, nc))}</td>
+                    <td style={Object.assign({}, td, { textAlign: "right" })}>{kr(ns.liq)}</td>
+                    <td style={Object.assign({}, td, { textAlign: "right" })}>{yrs(horizon2(nc))}</td>
+                    <td style={Object.assign({}, td, { textAlign: "right" })}>{kr(nc.passive)}</td>
+                    <td style={Object.assign({}, td, { textAlign: "right" })}>{yrs(horizon3(ns))}</td>
+                    <td style={Object.assign({}, td, { textAlign: "right" })}>{kr(nc.gross)}</td>
+                    <td style={Object.assign({}, td, { textAlign: "right" })}>{ns.debt === 0 ? "Gjeldfri" : pct(nc.ltv)}</td>
+                    <td style={Object.assign({}, td, { textAlign: "right" })}>{pct(nc.passiveCov)}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function toneStyle(kind) {
+  if (kind === "error") return { bg: "var(--error-bg)", fg: "var(--error-700)" };
+  if (kind === "warn") return { bg: "var(--warning-bg)", fg: "var(--warning-700)" };
+  if (kind === "ok") return { bg: "var(--success-bg)", fg: "var(--success-700)" };
+  return { bg: "var(--blue-50)", fg: "var(--blue-main)" };
+}
+
+function RecCard({ icon, title, kicker, pill, kind, points, footLabel, footValue }) {
+  const t = toneStyle(kind);
+  return (
+    <div style={card({ padding: 14, display: "flex", flexDirection: "column", minHeight: 0 })}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <div style={{ width: 32, height: 32, borderRadius: 8, background: "var(--blue-50)", display: "flex", alignItems: "center", justifyContent: "center", flex: "none" }}>
+            <Ico name={icon} size={16} color="var(--blue-main)" />
+          </div>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 500 }}>{title}</div>
+            <div style={{ fontSize: 11, color: "var(--gray-500)" }}>{kicker}</div>
+          </div>
+        </div>
+        <span style={{ background: t.bg, color: t.fg, fontSize: 11, fontWeight: 500, padding: "3px 8px", borderRadius: 100, whiteSpace: "nowrap" }}>{pill}</span>
+      </div>
+      <ul style={{ listStyle: "none", padding: 0, margin: "10px 0 0", flex: 1 }}>
+        {points.map((p, i) => (
+          <li key={i} style={{ display: "flex", gap: 6, fontSize: 12, lineHeight: 1.4, color: "var(--sp-navy)", marginBottom: 6 }}>
+            <Ico name="right-arrow-alt" size={14} color="var(--blue-main)" style={{ marginTop: 2, flex: "none" }} />
+            <span>{p}</span>
+          </li>
+        ))}
+      </ul>
+      <div style={{ borderTop: "1px solid var(--gray-200)", paddingTop: 8, display: "flex", justifyContent: "space-between", gap: 8, marginTop: 6 }}>
+        <span style={{ fontSize: 13, color: "var(--gray-500)" }}>{footLabel}</span>
+        <span style={Object.assign({ fontSize: 14 }, numStyle)}>{footValue}</span>
+      </div>
+    </div>
+  );
+}
+
+function TabStatus({ s, c, lvl, L, prog }) {
+  const next = LEVELS[Math.min(16, lvl + 1)];
+  const need = nextNeed(s, c, lvl);
+  const gap = lvl >= 16 ? 0 : (Number.isFinite(need) ? need - s.liq : Infinity);
+  const fulfilled = lvl >= 16 || (Number.isFinite(gap) && gap <= 0);
+  const costKind = c.costOfIncome > 100 ? "error" : c.costOfIncome > 80 ? "warn" : "ok";
+  const costPill = c.costOfIncome > 100 ? "Kritisk" : c.costOfIncome > 80 ? "Prioritet" : "Under kontroll";
+  const ltvKind = s.debt === 0 ? "ok" : c.ltv > 70 ? "error" : c.ltv > 40 ? "warn" : "ok";
+  const ltvPill = s.debt === 0 ? "Gjeldfri" : c.ltv > 70 ? "Høy" : c.ltv > 40 ? "Moderat" : "Lav";
+  const livShare = c.totalCost > 0 ? (c.living / c.totalCost) * 100 : 0;
+  const freed = c.living * 0.1;
+  const mNext = monthlyCostForNext(s, c, lvl);
+  const yearsToClose = c.surplus > 0 && gap > 0 ? gap / (c.surplus * 12) : null;
+  const fiNeed = s.prate > 0 ? c.totalCost / (s.prate / 100) : Infinity;
+  const plus1rate = s.debt * 0.01;
+
+  const costPoints = [
+    "Livsopphold utgjør " + pct(livShare) + " av totale kostnader. Et kutt på 10 % frigjør " + kr(freed) + " per år (" + kr(freed / 12) + " per måned).",
+    (mNext == null || !Number.isFinite(mNext))
+      ? "Neste nivå styres av kapital og avkastning mer enn av kostnadsnivået alene."
+      : mNext <= 0
+        ? "Eierkostnad og renter alene overstiger det kostnadsnivået som ville oppfylt neste nivå med dagens oppsparte midler."
+        : "Med dagens oppsparte midler ville et månedlig kostnadsnivå på " + kr(mNext) + " alene oppfylt kravet til neste nivå.",
+    "Eierkostnaden på " + kr(c.own) + " per år følger eiendelene, ikke inntekten. Den løper uavhengig av lønn.",
+  ];
+  const debtPoints = s.debt === 0 ? [
+    "Ingen gjeld. Renteøkninger treffer ikke husholdningen.",
+    "Belåningsgraden er 0 %. Kapitalen er ubelånt.",
+    "Gjeldfrihet er allerede oppnådd — kravet til nivå 10 er innfridd på dette punktet.",
+  ] : [
+    "Gjelden er " + kr(s.debt) + ", tilsvarende " + pct(c.ltv) + " av brutto eiendeler. Rentekostnaden er " + kr(c.interest) + " per år.",
+    "Ett prosentpoeng høyere rente koster " + kr(plus1rate) + " mer per år (" + kr(plus1rate / 12) + " per måned).",
+    "Oppsparte midler dekker " + (c.debtCov === Infinity ? "all gjeld" : pct(c.debtCov) + " av gjelden") + ". 100 % er kravet til nivå 10.",
+  ];
+  const savPoints = [
+    lvl >= 16
+      ? "Kravet til toppen av stigen er innfridd. Videre arbeid handler om forvaltning og formål."
+      : "Neste nivå krever " + (Number.isFinite(need) ? kr(need) : "–") + " i oppsparte midler. Gapet er " + (fulfilled ? "lukket" : (Number.isFinite(gap) ? kr(Math.max(0, gap)) : "–")) + ".",
+    c.surplus <= 0 && !fulfilled
+      ? "Månedlig overskudd er negativt. Gapet lukkes ikke uten inntektsøkning eller kutt i kostnadene."
+      : fulfilled
+        ? "Kapitalkravet til neste nivå er oppfylt — øvrige kriterier kan fortsatt gjenstå."
+        : "Med dagens månedlige overskudd på " + kr(c.surplus) + " lukkes gapet på " + yrs(yearsToClose) + ".",
+    "Dagens midler gir " + yrs(horizon1(s, c)) + " uten lønn (horisont 1). Selges alt, er horisonten " + yrs(horizon3(s)) + " (horisont 3).",
+  ];
+  const incPoints = [
+    "Passiv inntekt er " + kr(c.passive) + " per år ved " + pct1(s.prate) + " avkastning og dekker " + pct(c.passiveCov) + " av kostnadene.",
+    "Full frihet (100 % dekning) krever " + (Number.isFinite(fiNeed) ? kr(fiNeed) : "positiv avkastning") + " i oppsparte midler ved dagens avkastning.",
+    "Lønn utgjør " + pct(c.salaryShare) + " av totale inntekter." + (c.salaryShare > 80 ? " Avhengigheten av lønn er høy." : ""),
+  ];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 0, flex: 1 }}>
+      <div style={card({ padding: 16, display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: 20, flex: "none" })}>
+        <div>
+          <Eyebrow color="var(--blue-main)">Beregnet status</Eyebrow>
+          <h2 style={{ fontSize: 18, fontWeight: 500, letterSpacing: "-.01em", margin: "6px 0 8px", lineHeight: 1.3 }}>
+            {lvl >= 16
+              ? "Nivå 16 i dag. Toppen av stigen."
+              : "Nivå " + lvl + " i dag. Neste steg er nivå " + next.n + " — " + next.tittel + "."}
+          </h2>
+          <p style={{ fontSize: 13, lineHeight: 1.45, color: "var(--sp-navy)", margin: 0, textWrap: "pretty" }}>
+            Brutto lønnsinntekt er {s.salary === 0 ? "ingen" : kr(s.salary)}. Totale årlige kostnader er {kr(c.totalCost)}. Oppsparte midler er {kr(s.liq)}. Fremdrift mot neste nivå er {pct(prog * 100)}.
+          </p>
+        </div>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>
+            {lvl >= 16 ? "Kravet for nivå 16 · Generasjonsformue" : "Kravet for nivå " + next.n + " · " + next.tittel}
+          </div>
+          <div style={{ fontSize: 13, color: "var(--gray-600)", marginBottom: 8 }}>{lvl >= 16 ? L.kriterium : next.kriterium}</div>
+          {[
+            ["Oppsparte midler i dag", kr(s.liq)],
+            ["Behov for neste nivå", lvl >= 16 ? "Oppnådd" : (Number.isFinite(need) ? kr(need) : "–")],
+            ["Gap", fulfilled ? "Kravet oppfylt" : (Number.isFinite(gap) ? kr(Math.max(0, gap)) : "–")],
+          ].map(([a, b], i) => (
+            <div key={a} style={{ display: "flex", justifyContent: "space-between", gap: 12, padding: "5px 0", borderTop: "1px solid var(--gray-100)" }}>
+              <span style={{ fontSize: 12, color: "var(--gray-500)" }}>{a}</span>
+              <span style={Object.assign({ fontSize: 13, color: i === 2 ? (fulfilled ? "var(--success-700)" : "var(--warning-700)") : "var(--sp-navy)" }, numStyle)}>{b}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 10, flex: 1, minHeight: 0 }}>
+        <RecCard icon="receipt" title="Kostnader" kicker="Størst umiddelbar effekt" pill={costPill} kind={costKind}
+          points={costPoints} footLabel="Kostnader i % av totale inntekter" footValue={pct(c.costOfIncome)} />
+        <RecCard icon="building-house" title="Gjeld og rente" kicker="Reduserer sårbarhet" pill={ltvPill} kind={ltvKind}
+          points={debtPoints} footLabel="Gjeldsgrad" footValue={s.debt === 0 ? "Gjeldfri" : pct(c.ltv)} />
+        <RecCard icon="line-chart" title="Oppsparte midler" kicker="Bygger rullebane og frihet"
+          pill={fulfilled ? "Kravet oppfylt" : ("Gap " + (Number.isFinite(gap) ? mkr(Math.max(0, gap)) + " kr" : "–"))}
+          kind={fulfilled ? "ok" : "warn"}
+          points={savPoints} footLabel="Rullebane oppsparte midler" footValue={yrs(horizon1(s, c))} />
+        <RecCard icon="trending-up" title="Inntekt og avkastning" kicker="Flytter dekningsgraden"
+          pill={c.passiveCov >= 100 ? "FI oppnådd" : (pct(c.passiveCov) + " dekket")}
+          kind={c.passiveCov >= 100 ? "ok" : "info"}
+          points={incPoints} footLabel="Passiv dekningsgrad" footValue={pct(c.passiveCov)} />
+      </div>
+    </div>
+  );
+}
+
+const DIST = [
+  { n:0, tittel:"Økonomisk sårbarhet", terskel:"Bostedsløshet målt ved nasjonale punkttellinger (metodenotat 0.4)", usa:0.25, europa:0.4, norden:0.2, norge:0.1, kort:"bostedsløs" },
+  { n:1, tittel:"Familieavhengig", terskel:"Bor vederlagsfritt hos slekt, ingen egen inntekt", usa:3.5, europa:5.0, norden:2.6, norge:2.2, kort:"avhengig" },
+  { n:2, tittel:"Offentlig støtte", terskel:"Ytelser er eneste husholdningsinntekt", usa:7.25, europa:8.1, norden:7.0, norge:6.6, kort:"ytelser" },
+  { n:3, tittel:"Lavinntekt", terskel:"Arbeidsinntekt, men dekker < 70 % av nødvendige kostnader", usa:10.0, europa:8.5, norden:7.0, norge:6.0, kort:"lavinntekt" },
+  { n:4, tittel:"Hamsterhjulet", terskel:"R < 1 md. og høy gjeldsgrad / høy rentebelastning", usa:13.0, europa:8.0, norden:8.2, norge:6.7, kort:"hamsterhjul" },
+  { n:5, tittel:"Liten buffer", terskel:"R = 1–3 md.", usa:11.0, europa:12.0, norden:12.5, norge:12.0, kort:"1–3 md." },
+  { n:6, tittel:"Trygg hverdag", terskel:"R = 3–6 md.", usa:10.5, europa:13.7, norden:16.3, norge:17.5, kort:"3–6 md." },
+  { n:7, tittel:"Bærekraftig økonomi", terskel:"R = 6–12 md.", usa:8.5, europa:12.0, norden:15.8, norge:17.0, kort:"6–12 md." },
+  { n:8, tittel:"Begynnende frihet", terskel:"R ≥ 12 md. og fondskapital > bankinnskudd alene", usa:9.0, europa:9.5, norden:11.2, norge:12.0, kort:"≥ 1 år" },
+  { n:9, tittel:"Fleksibel karriere", terskel:"R = 2–4 år (≈ 2–4× årskostnad)", usa:7.5, europa:7.4, norden:8.0, norge:8.5, kort:"2–4 år" },
+  { n:10, tittel:"Bankuavhengig", terskel:"G = ja: likvide midler > all gjeld", usa:5.0, europa:6.5, norden:4.9, norge:5.0, kort:"gjeldfri" },
+  { n:11, tittel:"Lang rullebane", terskel:"R = 8–10 år (≈ 8–10× årskostnad)", usa:4.5, europa:3.6, norden:2.9, norge:3.0, kort:"8–10 år" },
+  { n:12, tittel:"Halvveis FI", terskel:"P = 50–99 % (≈ 12,5–25× årskostnad)", usa:4.0, europa:2.6, norden:1.85, norge:1.9, kort:"halv FI" },
+  { n:13, tittel:"Full FI", terskel:"P ≥ 100 % (≈ 25× årskostnad)", usa:2.8, europa:1.5, norden:0.95, norge:0.87, kort:"full FI" },
+  { n:14, tittel:"Luksus FI", terskel:"P > 150 % (≈ 37,5× årskostnad)", usa:1.9, europa:0.77, norden:0.4, norge:0.4, kort:"luksus" },
+  { n:15, tittel:"Uavhengig makt", terskel:"P ≥ 300 % (≈ 75× årskostnad)", usa:1.1, europa:0.35, norden:0.16, norge:0.17, kort:"makt" },
+  { n:16, tittel:"Generasjonsformue", terskel:"P ≥ 300 % og > 100 mill. kr likvid", usa:0.2, europa:0.08, norden:0.04, norge:0.06, kort:"generasjon" },
+];
+const RKEYS = ["usa","europa","norden","norge"];
+const RMETA = {
+  usa: { name:"USA", color:"#9747FF" },
+  europa: { name:"Europa", color:"#98A2B3" },
+  norden: { name:"Norden", color:"#264472" },
+  norge: { name:"Norge", color:"#0A5EDC" },
+};
+const MEDIAN_LV = { usa:5, europa:6, norden:6, norge:6 };
+const DIST_NOTES = {
+  0: "Kalibrert som bostedsløshet, ikke «fattigdom»: 4 197 voksne i Norge (uke 48 2025) = 0,075 %, mot 745 652 i USA (HUD jan. 2025) = 0,22 %. Punkttelling undervurderer; årsprevalens er 3–5× høyere. Behandle nivå 0 som et gulv.",
+  2: "Sosialhjelp er behovsprøvd og subsidiær — å motta stønad forutsetter tilnærmet null likviditet, og plasserer mottakeren presist på nivå 2 med null rullebane.",
+  4: "Tettest befolkede nivå i USA (13,0 %). I Norge er nivå 4 ikke fattigdom, men suksess med feil balansestruktur: 40,1 % av par med barn under 6 år hadde tung rentebelastning i 2024, opp fra 4,3 % i 2022.",
+  5: "Bransjens største feilallokering — kunder med negativ likvid nettoposisjon selges fondsprodukter når de trenger balanserestrukturering.",
+  6: "Medianhusholdningen i Norge og Norden: 2 mill. kr nettoformue, 890 000 kr gjeld, 217 000 kr disponibelt.",
+  10: "Porten som bryter stigen — måler balanse, ikke rullebane. Median nettoformue er 24 000 kr under 25 år og 4,2 mill. kr i gruppen 67–79 år.",
+  13: "Velferdsstaten har kjøpt nivå 13 gjennom pensjonsformue på gjennomsnittlig 6,3 mill. kr — men først fra 67 år.",
+  16: "Presisjon er en størrelsesorden, ikke desimaler; nivå 15–16 i Norge er et gulv.",
+};
+const DIST_NOTE_FB = "Modellestimat interpolert mellom ankerpunktene. Bruk fordelingsformen, ikke desimalene.";
+const meanLevel = col => {
+  const s = col.reduce((a, p) => a + p, 0);
+  return s === 0 ? 0 : col.reduce((a, p, i) => a + p * i, 0) / s;
+};
+const colOf = k => DIST.map(d => d[k]);
+const MEANS = { usa: meanLevel(colOf("usa")), europa: meanLevel(colOf("europa")), norden: meanLevel(colOf("norden")), norge: meanLevel(colOf("norge")) };
+const fmtPct1 = n => {
+  if (!Number.isFinite(n)) return "–";
+  const d = Math.abs(n) < 1 ? 2 : 1;
+  return n.toFixed(d).replace(".", ",") + "\u00a0%";
+};
+const fmtN = n => Number.isFinite(n) ? n.toFixed(2).replace(".", ",") : "–";
+const catmullPath = pts => {
+  if (!pts.length) return "";
+  let d = "M " + pts[0][0].toFixed(2) + "," + pts[0][1].toFixed(2);
+  for (let i = 0; i < pts.length - 1; i++) {
+    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+    d += " C " + (p1[0] + (p2[0] - p0[0]) / 6).toFixed(2) + "," + (p1[1] + (p2[1] - p0[1]) / 6).toFixed(2) + " "
+      + (p2[0] - (p3[0] - p1[0]) / 6).toFixed(2) + "," + (p2[1] - (p3[1] - p1[1]) / 6).toFixed(2) + " "
+      + p2[0].toFixed(2) + "," + p2[1].toFixed(2);
+  }
+  return d;
+};
+const VW = 1160, VH = 468;
+const PAD_L = 56, PAD_R = 20, PAD_T = 78, PAD_B = 22;
+const PLOT_R = VW - PAD_R, PLOT_B = VH - PAD_B, PLOT_H = PLOT_B - PAD_T;
+const xOf = i => PAD_L + i * (PLOT_R - PAD_L) / 16;
+const yOf = (v, mx) => PLOT_B - (v / mx) * PLOT_H;
+const seriesOf = (key, mode) => {
+  const col = colOf(key);
+  if (mode !== "kumulativ") return col;
+  let s = 0;
+  return col.map(v => (s += v));
+};
+
+function NdChip({ on, children, onClick, label }) {
+  const [h, setH] = useState(false);
+  return (
+    <button type="button" className="nd-chip" aria-pressed={on} aria-label={label || undefined} onClick={onClick}
+      onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
+      style={{ height: 34, borderRadius: 8, padding: "0 12px", display: "inline-flex", alignItems: "center", gap: 8, cursor: "pointer",
+        fontFamily: "inherit", fontSize: 13, fontWeight: 500,
+        background: on ? "var(--blue-100)" : (h ? "var(--gray-50)" : "#fff"),
+        color: on ? "var(--sp-navy)" : "var(--gray-500)",
+        border: "1px solid " + (on ? "var(--blue-300)" : "var(--gray-300)"),
+        transition: "background .15s ease-out, border-color .15s ease-out" }}>
+      {children}
+    </button>
+  );
+}
+
+function DistributionChart({ visible, mode, hover, selected, setHover, setSelected, accent }) {
+  const mx = mode === "kumulativ" ? 100 : 20;
+  const active = hover != null ? hover : selected;
+  const vis = RKEYS.filter(k => visible[k]);
+  const showLines = mode !== "kumulativ";
+  const pts = k => seriesOf(k, mode).map((v, i) => [xOf(i), yOf(v, mx)]);
+  const zone = (a, b) => {
+    const x1 = Math.max(PAD_L, xOf(a) - 33.9), x2 = Math.min(PLOT_R, xOf(b) + 33.9);
+    return { x: x1, w: x2 - x1 };
+  };
+  const z0 = zone(0, 4), z1 = zone(5, 9), z2 = zone(10, 16);
+  const yTicks = [0, mx * 0.25, mx * 0.5, mx * 0.75, mx];
+  const medianGroups = [];
+  vis.forEach(k => {
+    const lv = MEDIAN_LV[k];
+    let g = medianGroups.find(x => x.lv === lv);
+    if (!g) { g = { lv, keys: [] }; medianGroups.push(g); }
+    g.keys.push(k);
+  });
+  const onKey = e => {
+    if (e.key === "ArrowLeft") { e.preventDefault(); setSelected(Math.max(0, selected - 1)); setHover(null); }
+    if (e.key === "ArrowRight") { e.preventDefault(); setSelected(Math.min(16, selected + 1)); setHover(null); }
+    if (e.key === "Enter") { e.preventDefault(); setSelected(active); setHover(null); }
+  };
+  const tipLeft = hover == null ? 0 : xOf(hover) / VW * 100;
+  const tipFlip = tipLeft > 62;
+  const labelTop = PAD_T / VH * 100;
+  return (
+    <div style={{ width: "90%", margin: "0 auto" }}>
+      <div style={{ position: "relative", overflow: "hidden" }} tabIndex={0} onKeyDown={onKey} aria-label="Fordelingskurve etter nivå. Bruk piltaster for å flytte valgt nivå, Enter for å låse.">
+        <svg viewBox={"0 0 " + VW + " " + VH} role="img"
+          aria-label={"Fordeling av husholdninger på 17 nivåer for " + vis.map(k => RMETA[k].name).join(", ")}
+          style={{ width: "100%", aspectRatio: VW + "/" + VH, height: "auto", display: "block" }}>
+          <defs>
+            <clipPath id="nd-plot-clip">
+              <rect x={PAD_L} y={PAD_T} width={PLOT_R - PAD_L} height={PLOT_H} />
+            </clipPath>
+          </defs>
+          <rect x={z0.x} y={PAD_T} width={z0.w} height={PLOT_H} fill="rgba(253,162,155,.10)" />
+          <rect x={z1.x} y={PAD_T} width={z1.w} height={PLOT_H} fill="rgba(10,94,220,.04)" />
+          <rect x={z2.x} y={PAD_T} width={z2.w} height={PLOT_H} fill="rgba(38,68,114,.06)" />
+          {active != null && (() => {
+            const x = xOf(active) - 33.9;
+            const x1 = Math.max(PAD_L, x);
+            const w = Math.min(PLOT_R, x + 67.8) - x1;
+            return <rect x={x1} y={PAD_T} width={w} height={PLOT_H} fill="var(--blue-100)" stroke="var(--blue-300)" strokeWidth="1.5" pointerEvents="none" />;
+          })()}
+          {yTicks.map(v => {
+            const y = yOf(v, mx);
+            return <line key={v} x1={PAD_L} x2={PLOT_R} y1={y} y2={y} stroke={v === 0 ? "var(--gray-300)" : "var(--chart-grid)"} strokeWidth="1" />;
+          })}
+          {showLines && medianGroups.map(g => (
+            <line key={"med"+g.lv} x1={xOf(g.lv)} x2={xOf(g.lv)} y1={PAD_T} y2={PLOT_B}
+              stroke="var(--gray-600)" strokeWidth="1.5" strokeDasharray="5 5" opacity="0.7" />
+          ))}
+          {showLines && vis.map(k => (
+            <line key={"mean"+k} x1={xOf(MEANS[k])} x2={xOf(MEANS[k])} y1={PAD_T} y2={PLOT_B}
+              stroke={RMETA[k].color} strokeWidth="2" strokeDasharray="1.5 4" strokeLinecap="round" opacity="0.9" />
+          ))}
+          <g clipPath="url(#nd-plot-clip)">
+            {vis.map(k => {
+              const p = pts(k), d = catmullPath(p), acc = k === accent;
+              return (
+                <g key={k}>
+                  {acc && <path d={d + " L " + xOf(16) + " " + PLOT_B + " L " + PAD_L + " " + PLOT_B + " Z"} fill="rgba(10,94,220,.07)" />}
+                  <path d={d} fill="none" stroke={RMETA[k].color} strokeWidth={acc ? 3.4 : 2} strokeLinejoin="round" strokeLinecap="round" />
+                </g>
+              );
+            })}
+          </g>
+          {active != null && vis.map(k => {
+            const v = seriesOf(k, mode)[active];
+            return <circle key={"m"+k} cx={xOf(active)} cy={yOf(v, mx)} r="4.5" fill="#fff" stroke={RMETA[k].color} strokeWidth="2.5" />;
+          })}
+          {DIST.map(d => (
+            <rect key={d.n} x={xOf(d.n) - 33.9} y={PAD_T} width="67.8" height={PLOT_H} fill="transparent"
+              onMouseEnter={() => setHover(d.n)} onMouseLeave={() => setHover(null)} onClick={() => setSelected(d.n)} style={{ cursor: "pointer" }} />
+          ))}
+        </svg>
+        {[
+          { t: "UNDER 1 MD. RULLEBANE", l: "16.5%" },
+          { t: "BUFFER OG RULLEBANE", l: "45.7%" },
+          { t: "KAPITALDREVET FRIHET", l: "79.3%" },
+        ].map(z => (
+          <div key={z.t} style={{ position: "absolute", top: 14, left: z.l, transform: "translateX(-50%)", fontSize: 11, fontWeight: 600, letterSpacing: ".08em", color: "var(--gray-500)", whiteSpace: "nowrap", pointerEvents: "none" }}>{z.t}</div>
+        ))}
+        {yTicks.map((v, i) => (
+          <div key={i} style={{ position: "absolute", left: "3.6%", top: (yOf(v, mx) / VH * 100) + "%", transform: "translate(-100%,-50%)", fontSize: 12, color: "var(--gray-500)", fontVariantNumeric: "tabular-nums", pointerEvents: "none" }}>{mode === "kumulativ" ? Math.round(v) : v}</div>
+        ))}
+        {showLines && medianGroups.map((g, i) => (
+          <div key={"ml"+g.lv} style={{ position: "absolute", left: (xOf(g.lv) / VW * 100) + "%", top: (labelTop + 3 + i * 3.4) + "%", transform: "translateX(6px)", fontSize: 12, fontWeight: 600, color: "var(--gray-600)", pointerEvents: "none", whiteSpace: "nowrap" }}>
+            median {g.keys.map(k => RMETA[k].name).join(" / ")}
+          </div>
+        ))}
+        {showLines && vis.map((k, i) => (
+          <div key={"mn"+k} style={{ position: "absolute", left: (xOf(MEANS[k]) / VW * 100) + "%", top: (labelTop + 7 + medianGroups.length * 3.4 + i * 3.2) + "%", transform: "translateX(6px)", fontSize: 12, fontWeight: 600, color: RMETA[k].color, pointerEvents: "none", whiteSpace: "nowrap" }}>
+            gj.sn. {RMETA[k].name} {fmtN(MEANS[k])}
+          </div>
+        ))}
+        {hover != null && (
+          <div style={{ position: "absolute", top: "6%", left: tipLeft + "%", transform: tipFlip ? "translateX(-108%)" : "translateX(8%)",
+            background: "#fff", borderRadius: 12, border: "1px solid var(--gray-200)", boxShadow: "0 12px 24px -6px rgba(16,24,40,.14)",
+            minWidth: 200, padding: "12px 14px", pointerEvents: "none", zIndex: 5 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: ".08em", color: "var(--gray-500)" }}>NIVÅ {hover}</div>
+            <div style={{ fontSize: 14, fontWeight: 500, color: "var(--sp-navy)", margin: "4px 0 10px" }}>{DIST[hover].tittel}</div>
+            {vis.map(k => (
+              <div key={k} style={{ display: "flex", justifyContent: "space-between", gap: 16, fontSize: 13, padding: "3px 0" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: 6 }}><span style={{ width: 8, height: 8, borderRadius: "50%", background: RMETA[k].color }} />{RMETA[k].name}</span>
+                <span style={numStyle}>{fmtPct1(seriesOf(k, mode)[hover])}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div style={{ display: "flex", marginTop: 4 }}>
+        {DIST.map(d => {
+          const on = selected === d.n;
+          return (
+            <button key={d.n} type="button" className="nd-axis" aria-pressed={on} aria-label={"Nivå " + d.n + ", " + d.tittel}
+              onClick={() => setSelected(d.n)} onMouseEnter={() => setHover(d.n)} onMouseLeave={() => setHover(null)}
+              style={{ flex: 1, height: 26, border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 13.5, fontWeight: 600,
+                background: on ? "var(--blue-100)" : "transparent", color: (on || hover === d.n) ? "var(--blue-main)" : "var(--sp-navy)",
+                borderRadius: 6 }}>
+              {d.n}
+            </button>
+          );
+        })}
+      </div>
+      <div style={{ textAlign: "center", fontSize: 13.5, fontWeight: 600, color: "var(--sp-navy)", marginTop: 4 }}>
+        Nivå {active} — {DIST[active].tittel}
+      </div>
+    </div>
+  );
+}
+
+function TabNormal() {
+  const saved = (() => { try { return JSON.parse(localStorage.getItem("likvid-sannhet-dashboard")) || {}; } catch (e) { return {}; } })();
+  const [mode, setMode] = useState(saved.mode || "andel");
+  const [selected, setSelected] = useState(saved.selected != null ? saved.selected : 6);
+  const [visible, setVisible] = useState(saved.visibleRegions || { usa: true, europa: true, norden: true, norge: true });
+  const [hover, setHover] = useState(null);
+  const [accent] = useState("norge");
+  useEffect(() => {
+    localStorage.setItem("likvid-sannhet-dashboard", JSON.stringify({ mode, selected, visibleRegions: visible }));
+  }, [mode, selected, visible]);
+  const toggleR = k => setVisible(v => {
+    const n = Object.assign({}, v, { [k]: !v[k] });
+    return RKEYS.some(x => n[x]) ? n : v;
+  });
+  const L = DIST[selected];
+  const zone = selected <= 4 ? { t: "Under 1 md. rullebane", bg: "var(--error-bg)", fg: "var(--error-700)" }
+    : selected <= 9 ? { t: "Buffer og rullebane", bg: "var(--blue-100)", fg: "var(--blue-main)" }
+    : { t: "Kapitaldrevet frihet", bg: "var(--secondary-100)", fg: "var(--secondary-800)" };
+  const maxBar = Math.max.apply(null, RKEYS.map(k => L[k]));
+  const kpi = [
+    { k: "usa", lv: 5, desc: "Liten buffer — bimodal, tykk hale", u3: 45.0, fi: 6.00 },
+    { k: "europa", lv: 6, desc: "Trygg hverdag, nedre del", u3: 42.0, fi: 2.70 },
+    { k: "norden", lv: 6, desc: "Trygg hverdag — bredt midtplatå", u3: 37.5, fi: 1.55 },
+    { k: "norge", lv: 6, desc: "Trygg hverdag — 217 000 kr disponibelt", u3: 33.6, fi: 1.50 },
+  ];
+
+  return (
+    <div style={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden", background: "var(--gray-50)" }}>
+      <main style={{ flex: 1, minWidth: 0, overflow: "auto", background: "var(--gray-50)", padding: "24px 28px 40px", display: "flex", flexDirection: "column", gap: 20 }}>
+        <h1 style={{ margin: 0, fontSize: 28, fontWeight: 500, letterSpacing: "-.01em", color: "var(--sp-navy)", lineHeight: 1.2 }}>Internasjonal fordeling på nivå 0–17</h1>
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div style={card({ padding: 20 })}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 12 }}>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  {RKEYS.map(k => (
+                    <NdChip key={k} on={visible[k]} onClick={() => toggleR(k)} label={RMETA[k].name}>
+                      <span style={{ width: 20, height: 3, background: RMETA[k].color, borderRadius: 2 }} /> {RMETA[k].name}
+                    </NdChip>
+                  ))}
+                </div>
+                <div style={{ display: "inline-flex", padding: 3, background: "var(--gray-100)", borderRadius: 5, gap: 2 }}>
+                  {[{ id: "andel", t: "Andel per nivå" }, { id: "kumulativ", t: "Kumulativ" }].map(m => (
+                    <button key={m.id} type="button" aria-pressed={mode === m.id} onClick={() => setMode(m.id)}
+                      style={{ height: 28, padding: "0 12px", border: "none", borderRadius: 4, cursor: "pointer", fontFamily: "inherit", fontSize: 13, fontWeight: 500,
+                        background: mode === m.id ? "#fff" : "transparent", color: "var(--sp-navy)", boxShadow: mode === m.id ? "0 1px 2px rgba(16,24,40,.06)" : "none" }}>{m.t}</button>
+                  ))}
+                </div>
+              </div>
+              <DistributionChart visible={visible} mode={mode} hover={hover} selected={selected} setHover={setHover} setSelected={setSelected} accent={accent} />
+              {mode !== "kumulativ" && (
+                <div style={{ marginTop: 14, padding: "10px 14px", background: "var(--gray-25)", border: "1px solid var(--gray-200)", borderRadius: 8 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: ".08em", color: "var(--gray-500)", marginBottom: 8 }}>MEDIAN OG VEKTET GJENNOMSNITTSNIVÅ</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 8 }}>
+                    {RKEYS.filter(k => visible[k]).map(k => (
+                      <span key={k} style={{ fontSize: 13, color: "var(--sp-navy)", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                        <span style={{ width: 14, borderTop: "2px dotted " + RMETA[k].color }} /> {RMETA[k].name} · median {MEDIAN_LV[k]} · gj.sn. {fmtN(MEANS[k])}
+                      </span>
+                    ))}
+                  </div>
+                  <p style={{ margin: 0, fontSize: 13, color: "var(--gray-600)", lineHeight: 1.5 }}>
+                    Gjennomsnittet ligger over medianen fordi halen på nivå 10–16 trekker tyngdepunktet oppover — mest i USA, der medianen står på nivå 5 og gjennomsnittet på {fmtN(MEANS.usa)}. Retningen er den samme som i kroner (USA 696 277 mot 69 000 USD, 10:1; eurosonen 312 000 mot 140 100 €), men utslaget dempes fordi nivåskalaen er ordinal, ikke lineær i kroner.
+                  </p>
+                </div>
+              )}
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginTop: 10, fontSize: 11.5, color: "var(--gray-400)" }}>
+                <span>Nivå 0–16 · husholdningsvektet andel · stiplet linje = median, punktert = vektet gjennomsnittsnivå (Σ andel × nivå)</span>
+                <span>Kilde: Fed SHED 2025, ECB HFCS 2023, Eurostat 2024, SSB 2024 — modellestimater</span>
+              </div>
+            </div>
+            <div style={card({ padding: 20 })}>
+              <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: ".08em", color: "var(--gray-500)" }}>VALGT NIVÅ</div>
+              <div style={{ fontSize: 20, fontWeight: 500, margin: "6px 0 8px" }}>Nivå {L.n} — {L.tittel}</div>
+              <span style={{ display: "inline-block", background: zone.bg, color: zone.fg, fontSize: 12, fontWeight: 500, padding: "4px 10px", borderRadius: 100 }}>{zone.t}</span>
+              <div style={{ marginTop: 12, padding: 12, background: "var(--gray-25)", borderRadius: 8, fontSize: 13, color: "var(--gray-700)" }}>Operasjonell terskel: {L.terskel}</div>
+              <div style={{ marginTop: 14, display: "flex", flexDirection: "column", gap: 8 }}>
+                {RKEYS.map(k => (
+                  <div key={k} style={{ display: "grid", gridTemplateColumns: "82px 1fr 56px", gap: 8, alignItems: "center" }}>
+                    <span style={{ fontSize: 13 }}>{RMETA[k].name}</span>
+                    <div style={{ height: 10, background: "var(--gray-100)", borderRadius: 100, overflow: "hidden" }}>
+                      <div style={{ width: (maxBar ? L[k] / maxBar * 100 : 0) + "%", height: "100%", background: RMETA[k].color, borderRadius: 100 }} />
+                    </div>
+                    <span style={Object.assign({ fontSize: 13, textAlign: "right" }, numStyle)}>{fmtPct1(L[k])}</span>
+                  </div>
+                ))}
+              </div>
+              <p style={{ margin: "14px 0 0", fontSize: 13, color: "var(--gray-600)", lineHeight: 1.5 }}>{DIST_NOTES[L.n] || DIST_NOTE_FB}</p>
+            </div>
+            <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              {kpi.map(x => (
+                <div key={x.k} style={card({ flex: 1, minWidth: 220, padding: 16 })}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: RMETA[x.k].color }} />
+                    <span style={{ fontSize: 14, fontWeight: 500 }}>{RMETA[x.k].name}</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: "var(--gray-500)" }}>Medianhusholdningen står på</div>
+                  <div style={Object.assign({ fontSize: 30, margin: "2px 0 4px" }, numStyle)}>Nivå {x.lv}</div>
+                  <div style={{ fontSize: 13, color: "var(--gray-600)", minHeight: 36 }}>{x.desc}</div>
+                  <div style={{ borderTop: "1px solid var(--gray-200)", marginTop: 10, paddingTop: 10, fontSize: 12, color: "var(--gray-600)", display: "flex", flexDirection: "column", gap: 4 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}><span>Gjennomsnittsnivå (vektet)</span><span style={numStyle}>{fmtN(MEANS[x.k])}</span></div>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}><span>Avvik gj.sn. − median</span><span style={Object.assign({}, numStyle, { color: "var(--chart-violet)" })}>{fmtN(MEANS[x.k] - x.lv)}</span></div>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}><span>Under 3 md.</span><span style={numStyle}>{fmtPct1(x.u3)}</span></div>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}><span>Reell FI (13+)</span><span style={numStyle}>{fmtPct1(x.fi)}</span></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+      </main>
+    </div>
+  );
+}
+
+RKEYS.forEach(k => {
+  const s = colOf(k).reduce((a, p) => a + p, 0);
+  if (Math.abs(s - 100) > 0.3) console.error("Kolonnesum " + k + ": " + s);
+});
+(function () {
+  const eight = [0,0,0,0,0,0,0,0,100,0,0,0,0,0,0,0,0];
+  const m = meanLevel(eight);
+  if (Math.abs(m - 8) > 0.001) console.error("meanLevel forventet 8, fikk " + m);
+})();
+
+
+function App() {
+  const [tab, setTab] = useState("forside");
+  const [raw, setRaw] = useState(LEVELS[10].p);
+  const s = normalize(Object.assign({}, DEFAULTS, raw));
+  const c = calc(s);
+  const lvl = evaluate(s, c);
+  const L = LEVELS[lvl];
+  const prog = progress(lvl, c);
+  const setField = (k, v) => setRaw(prev => Object.assign({}, normalize(prev), { [k]: v }));
+  const loadLevel = n => setRaw(LEVELS[n].p);
+
+  return (
+    <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", background: "var(--gray-50)", color: "var(--sp-navy)" }}>
+      <div style={{ flex: "none", background: "#fff", borderBottom: "1px solid var(--gray-200)" }}>
+        <div style={{ maxWidth: 1520, margin: "0 auto", padding: "0 20px", display: "flex", alignItems: "center", gap: 16, minHeight: 52 }}>
+          <div style={{ display: "flex", alignItems: "center", minWidth: 0, flex: "none" }}>
+            <img src="assets/spwm-logo.svg" alt="Söderberg & Partners Wealth Management" height="22" style={{ height: 22, width: "auto", display: "block" }} />
+          </div>
+          <div style={{ display: "flex", gap: 2, overflowX: "auto", flex: 1, justifyContent: "center" }}>
+            {TABS.map(t => {
+              const on = tab === t.id;
+              return (
+                <button key={t.id} onClick={() => setTab(t.id)} style={{
+                  display: "inline-flex", alignItems: "center", gap: 6, padding: "14px 14px",
+                  background: "transparent", border: "none", cursor: "pointer",
+                  color: on ? "var(--blue-main)" : "var(--gray-500)",
+                  fontSize: 13, fontWeight: 500, whiteSpace: "nowrap",
+                  borderBottom: on ? "2px solid var(--blue-main)" : "2px solid transparent",
+                  transition: "color .15s ease-out, border-color .15s ease-out",
+                }}>
+                  <Ico name={t.icon} size={16} /> {t.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+      <div style={{ maxWidth: tab === 4 ? "none" : 1520, width: "100%", margin: "0 auto", padding: tab === 4 ? 0 : "22px 20px 28px", display: "flex", flexDirection: "column", gap: tab === 4 ? 0 : 10, minHeight: 0, flex: 1, overflow: "hidden" }}>
+        {tab !== 4 && tab !== "forside" && <Hero L={L} prog={prog} />}
+        <div style={{ minHeight: 0, flex: 1, overflow: tab === 4 ? "hidden" : "auto", display: "flex", flexDirection: "column", marginTop: tab === 4 || tab === "forside" ? 0 : 26 }}>
+          {tab === "forside" && <TabForside onStart={() => setTab(0)} loadLevel={loadLevel} />}
+          {tab === 0 && <TabEconomy s={s} c={c} lvl={lvl} setField={setField} loadLevel={loadLevel} />}
+          {tab === 1 && <TabCosts s={s} c={c} />}
+          {tab === 2 && <TabMatrix s={s} c={c} lvl={lvl} loadLevel={loadLevel} />}
+          {tab === 3 && <TabStatus s={s} c={c} lvl={lvl} L={L} prog={prog} />}
+          {tab === 4 && <TabNormal />}
+        </div>
+        {tab !== 4 && tab !== "forside" && <Footnote />}
+      </div>
+    </div>
+  );
+}
+
+LEVELS.forEach(L => {
+  const s = normalize(L.p);
+  const got = evaluate(s, calc(s));
+  if (got !== L.n) console.error("Nivåavvik: forventet " + L.n + ", fikk " + got);
+});
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
