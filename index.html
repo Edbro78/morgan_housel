@@ -452,14 +452,14 @@ function TabForside({ onStart, loadLevel }) {
 
 function TabEconomy({ s, c, lvl, setField, loadLevel }) {
   const fields = [
-    { key: "salary", label: "Brutto lønnsinntekt\n(årlig)", min: 0, max: 5000000, step: 50000, format: kr },
-    { key: "cost", label: "Månedlige kostnader\nex. renter og avdrag", min: 10000, max: 200000, step: 1000, format: kr, hint: kr(s.cost * 12) + " per år i livsopphold" },
-    { key: "liq", label: "Oppsparte midler\n(bank, fond, aksjer)", min: 0, max: 150000000, step: 250000, format: kr, hint: "Gir " + kr(c.passive) + " i passiv inntekt per år" },
+    { key: "salary", label: "Brutto lønnsinntekt\n(årlig)", min: 0, max: 15000000, step: 50000, format: kr },
+    { key: "cost", label: "Månedlige kostnader\nex. renter og avdrag", min: 10000, max: 600000, step: 1000, format: kr, hint: kr(s.cost * 12) + " per år i livsopphold" },
+    { key: "liq", label: "Oppsparte midler\n(bank, fond, aksjer)", min: 0, max: 450000000, step: 250000, format: kr, hint: "Gir " + kr(c.passive) + " i passiv inntekt per år" },
     { key: "prate", label: "Forventet avkastning\npå oppsparte midler", min: 0, max: 12, step: 0.5, format: v => pct1(v), hint: kr(s.liq) + " × " + pct1(s.prate).replace(" %", "") + " % = " + kr(c.passive) },
-    { key: "assets", label: "Øvrige eiendeler brutto\n(bolig, hytte, bil)", min: 0, max: 50000000, step: 250000, format: kr, hint: "Eierkostnad 2,5 %: " + kr(c.own) + " per år" },
+    { key: "assets", label: "Øvrige eiendeler brutto\n(bolig, hytte, bil)", min: 0, max: 150000000, step: 250000, format: kr, hint: "Eierkostnad 2,5 %: " + kr(c.own) + " per år" },
     { key: "debt", label: "Total gjeld", min: 0, max: 20000000, step: 100000, format: kr, hint: "Rentekostnad: " + kr(c.interest) + " per år" },
     { key: "rate", label: "Lånerente", min: 0, max: 10, step: 0.1, format: v => pct1(v), hint: "Endrer rentekostnaden direkte" },
-    { key: "taxFree", label: "Skattefrie / andre inntekter\n(årlig)", min: 0, max: 1000000, step: 10000, format: kr, hint: "Netto, utenfor lønn" },
+    { key: "taxFree", label: "Skattefrie / andre inntekter\n(årlig)", min: 0, max: 3000000, step: 10000, format: kr, hint: "Netto, utenfor lønn" },
   ];
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6, minHeight: 0, flex: 1 }}>
@@ -937,7 +937,7 @@ function NdChip({ on, children, onClick, label }) {
   );
 }
 
-function DistributionChart({ visible, mode, hover, selected, setHover, setSelected, accent }) {
+function DistributionChart({ visible, mode, hover, selected, setHover, setSelected, accent, clientLvl, showClient }) {
   const mx = mode === "kumulativ" ? 100 : 20;
   const active = hover != null ? hover : selected;
   const vis = RKEYS.filter(k => visible[k]);
@@ -978,7 +978,20 @@ function DistributionChart({ visible, mode, hover, selected, setHover, setSelect
           <rect x={z0.x} y={PAD_T} width={z0.w} height={PLOT_H} fill="rgba(253,162,155,.10)" />
           <rect x={z1.x} y={PAD_T} width={z1.w} height={PLOT_H} fill="rgba(10,94,220,.04)" />
           <rect x={z2.x} y={PAD_T} width={z2.w} height={PLOT_H} fill="rgba(38,68,114,.06)" />
-          {active != null && (() => {
+          {showClient && clientLvl != null && (() => {
+            const x = xOf(clientLvl) - 33.9;
+            const x1 = Math.max(PAD_L, x);
+            const w = Math.min(PLOT_R, x + 67.8) - x1;
+            const cx = xOf(clientLvl);
+            return (
+              <g pointerEvents="none">
+                <rect x={x1} y={PAD_T} width={w} height={PLOT_H} fill="rgba(0,35,89,.10)" />
+                <line x1={cx} x2={cx} y1={PAD_T} y2={PLOT_B} stroke="var(--sp-navy)" strokeWidth="1.75" />
+                <polygon points={[cx, PAD_T + 2, cx + 6, PAD_T + 10, cx, PAD_T + 18, cx - 6, PAD_T + 10].join(" ")} fill="var(--sp-navy)" />
+              </g>
+            );
+          })()}
+          {active != null && !(showClient && active === clientLvl) && (() => {
             const x = xOf(active) - 33.9;
             const x1 = Math.max(PAD_L, x);
             const w = Math.min(PLOT_R, x + 67.8) - x1;
@@ -1011,6 +1024,10 @@ function DistributionChart({ visible, mode, hover, selected, setHover, setSelect
             const v = seriesOf(k, mode)[active];
             return <circle key={"m"+k} cx={xOf(active)} cy={yOf(v, mx)} r="4.5" fill="#fff" stroke={RMETA[k].color} strokeWidth="2.5" />;
           })}
+          {showClient && clientLvl != null && vis.map(k => {
+            const v = seriesOf(k, mode)[clientLvl];
+            return <circle key={"c"+k} cx={xOf(clientLvl)} cy={yOf(v, mx)} r="5.5" fill="#fff" stroke="var(--sp-navy)" strokeWidth="2.2" />;
+          })}
           {DIST.map(d => (
             <rect key={d.n} x={xOf(d.n) - 33.9} y={PAD_T} width="67.8" height={PLOT_H} fill="transparent"
               onMouseEnter={() => setHover(d.n)} onMouseLeave={() => setHover(null)} onClick={() => setSelected(d.n)} style={{ cursor: "pointer" }} />
@@ -1036,6 +1053,26 @@ function DistributionChart({ visible, mode, hover, selected, setHover, setSelect
             gj.sn. {RMETA[k].name} {fmtN(MEANS[k])}
           </div>
         ))}
+        {showClient && clientLvl != null && (
+          <div style={{
+            position: "absolute",
+            left: (xOf(clientLvl) / VW * 100) + "%",
+            top: ((PAD_T + 26) / VH * 100) + "%",
+            transform: xOf(clientLvl) / VW * 100 > 62 ? "translateX(-108%)" : "translateX(10px)",
+            pointerEvents: "none", zIndex: 4,
+          }}>
+            <div style={{
+              background: "var(--sp-navy)", color: "#fff", borderRadius: 100, padding: "6px 12px 6px 10px",
+              boxShadow: "0 12px 24px -6px rgba(16,24,40,.22)",
+              display: "flex", alignItems: "center", gap: 8, whiteSpace: "nowrap",
+            }}>
+              <span style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--blue-400)", flex: "none" }} />
+              <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: ".08em", color: "var(--blue-400)" }}>KLIENT</span>
+              <span style={{ width: 1, height: 12, background: "rgba(255,255,255,.22)" }} />
+              <span style={{ fontSize: 13, fontWeight: 500 }}>Nivå {clientLvl} — {DIST[clientLvl].tittel}</span>
+            </div>
+          </div>
+        )}
         {hover != null && (
           <div style={{ position: "absolute", top: "6%", left: tipLeft + "%", transform: tipFlip ? "translateX(-108%)" : "translateX(8%)",
             background: "#fff", borderRadius: 12, border: "1px solid var(--gray-200)", boxShadow: "0 12px 24px -6px rgba(16,24,40,.14)",
@@ -1058,8 +1095,9 @@ function DistributionChart({ visible, mode, hover, selected, setHover, setSelect
             <button key={d.n} type="button" className="nd-axis" aria-pressed={on} aria-label={"Nivå " + d.n + ", " + d.tittel}
               onClick={() => setSelected(d.n)} onMouseEnter={() => setHover(d.n)} onMouseLeave={() => setHover(null)}
               style={{ flex: 1, height: 26, border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 13.5, fontWeight: 600,
-                background: on ? "var(--blue-100)" : "transparent", color: (on || hover === d.n) ? "var(--blue-main)" : "var(--sp-navy)",
-                borderRadius: 6 }}>
+                background: on ? "var(--blue-100)" : (showClient && d.n === clientLvl ? "rgba(0,35,89,.08)" : "transparent"),
+                color: (on || hover === d.n) ? "var(--blue-main)" : (showClient && d.n === clientLvl ? "var(--sp-navy)" : "var(--sp-navy)"),
+                borderRadius: 6, boxShadow: showClient && d.n === clientLvl ? "inset 0 -2px 0 var(--sp-navy)" : "none" }}>
               {d.n}
             </button>
           );
@@ -1072,16 +1110,17 @@ function DistributionChart({ visible, mode, hover, selected, setHover, setSelect
   );
 }
 
-function TabNormal() {
+function TabNormal({ clientLvl }) {
   const saved = (() => { try { return JSON.parse(localStorage.getItem("likvid-sannhet-dashboard")) || {}; } catch (e) { return {}; } })();
   const [mode, setMode] = useState(saved.mode || "andel");
   const [selected, setSelected] = useState(saved.selected != null ? saved.selected : 6);
   const [visible, setVisible] = useState(saved.visibleRegions || { usa: true, europa: true, norden: true, norge: true });
   const [hover, setHover] = useState(null);
+  const [showClient, setShowClient] = useState(saved.showClient != null ? saved.showClient : false);
   const [accent] = useState("norge");
   useEffect(() => {
-    localStorage.setItem("likvid-sannhet-dashboard", JSON.stringify({ mode, selected, visibleRegions: visible }));
-  }, [mode, selected, visible]);
+    localStorage.setItem("likvid-sannhet-dashboard", JSON.stringify({ mode, selected, visibleRegions: visible, showClient }));
+  }, [mode, selected, visible, showClient]);
   const toggleR = k => setVisible(v => {
     const n = Object.assign({}, v, { [k]: !v[k] });
     return RKEYS.some(x => n[x]) ? n : v;
@@ -1111,6 +1150,9 @@ function TabNormal() {
                       <span style={{ width: 20, height: 3, background: RMETA[k].color, borderRadius: 2 }} /> {RMETA[k].name}
                     </NdChip>
                   ))}
+                  <NdChip on={showClient} onClick={() => { setShowClient(v => !v); if (!showClient && clientLvl != null) setSelected(clientLvl); }} label="Klient">
+                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--sp-navy)", boxShadow: showClient ? "0 0 0 3px rgba(0,35,89,.14)" : "none" }} /> Klient
+                  </NdChip>
                 </div>
                 <div style={{ display: "inline-flex", padding: 3, background: "var(--gray-100)", borderRadius: 5, gap: 2 }}>
                   {[{ id: "andel", t: "Andel per nivå" }, { id: "kumulativ", t: "Kumulativ" }].map(m => (
@@ -1120,7 +1162,7 @@ function TabNormal() {
                   ))}
                 </div>
               </div>
-              <DistributionChart visible={visible} mode={mode} hover={hover} selected={selected} setHover={setHover} setSelected={setSelected} accent={accent} />
+              <DistributionChart visible={visible} mode={mode} hover={hover} selected={selected} setHover={setHover} setSelected={setSelected} accent={accent} clientLvl={clientLvl} showClient={showClient} />
               {mode !== "kumulativ" && (
                 <div style={{ marginTop: 14, padding: "10px 14px", background: "var(--gray-25)", border: "1px solid var(--gray-200)", borderRadius: 8 }}>
                   <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: ".08em", color: "var(--gray-500)", marginBottom: 8 }}>MEDIAN OG VEKTET GJENNOMSNITTSNIVÅ</div>
@@ -1240,7 +1282,7 @@ function App() {
           {tab === 1 && <TabCosts s={s} c={c} />}
           {tab === 2 && <TabMatrix s={s} c={c} lvl={lvl} loadLevel={loadLevel} />}
           {tab === 3 && <TabStatus s={s} c={c} lvl={lvl} L={L} prog={prog} />}
-          {tab === 4 && <TabNormal />}
+          {tab === 4 && <TabNormal clientLvl={lvl} />}
         </div>
         {tab !== 4 && tab !== "forside" && <Footnote />}
       </div>
