@@ -331,22 +331,34 @@ function horizon3(s) {
   }
   return m >= 1200 ? 100 : m / 12;
 }
-function evaluate(s, c) {
-  if (c.income === 0 && s.liq === 0) return 0;
-  if (s.salary === 0 && s.taxFree === 0 && s.assets === 0 && s.liq < 1e5) return 1;
-  if (c.passiveCov >= 300) return s.liq >= 1e8 ? 16 : 15;
-  if (c.passiveCov > 150) return 14;
-  if (c.passiveCov >= 100) return 13;
-  if (c.passiveCov >= 50) return 12;
-  if (c.runway >= 8) return 11;
-  if (s.salary > 0 && c.coverage < 70) return 3;
+function wealthLevel(s, c) {
+  if (c.runway >= 8) {
+    if (c.passiveCov >= 300) return s.liq >= 1e8 ? 16 : 15;
+    if (c.passiveCov > 150) return 14;
+    if (c.passiveCov >= 100) return 13;
+    if (c.passiveCov >= 50) return 12;
+    return 11;
+  }
   if (c.runway >= 2) return (s.debt > 0 && c.debtCov < 100) ? 9 : 10;
   if (c.runway >= 1 && s.liq >= 500000) return 8;
   if (c.runway >= 0.5) return 7;
   if (c.runway >= 0.25) return 6;
   if (c.runway >= 1 / 12) return 5;
+  return 4;
+}
+function evaluate(s, c) {
+  if (c.income === 0 && s.liq === 0) return 0;
+  if (s.salary === 0 && s.taxFree === 0 && s.assets === 0 && s.liq < 1e5) return 1;
+  if (s.salary > 0 && c.coverage < 70 && c.runway < 1 / 12) return 3;
+  const wealth = wealthLevel(s, c);
+  if (wealth > 4) return wealth;
   if (s.salary === 0 && s.taxFree > 0) return 2;
   return 4;
+}
+function stepLevel(prev, raw) {
+  if (raw > prev) return Math.min(raw, prev + 1);
+  if (raw < prev) return Math.max(raw, prev - 1);
+  return raw;
 }
 function clamp01(x) {
   if (!Number.isFinite(x)) return x === Infinity ? 1 : 0;
@@ -849,12 +861,13 @@ function projectFuture(s, a) {
     });
     state.folkPay = folkPay;
     const c = calc(state);
-    const lvl = evaluate(state, c);
+    const raw = evaluate(state, c);
+    const lvl = points.length ? stepLevel(points[points.length - 1].lvl, raw) : raw;
     let phase = "sparing";
     if (age >= pensionStart && age < pensionStart + payoutSpan) phase = "utbetaling";
     else if (age >= pensionStart + payoutSpan) phase = "etter pensjon";
     points.push({
-      age, lvl, phase, deposit, payout, pensionCapital, saved, folk: folkPay,
+      age, lvl, raw, phase, deposit, payout, pensionCapital, saved, folk: folkPay,
       s: state, c, L: LEVELS[lvl],
     });
   };
@@ -902,15 +915,13 @@ function shiftReason(prev, next) {
   const from = prev.lvl, to = next.lvl;
   const cov = "Passiv dekning gikk fra " + pct1(prev.c.passiveCov) + " til " + pct1(next.c.passiveCov) + ".";
   const runwayNow = yrs(next.c.runway);
-  if (to === 16) return cov + " Oppsparte midler er " + mkr(next.s.liq) + ", allerede over 100 mill. Nivå 15 krever under 100 mill. oppspart.";
+  if (next.raw > to) return "Kravene til nivå " + next.raw + " er allerede oppfylt. Trappen går ett nivå av gangen, så dette året er nivå " + to + ".";
+  if (next.raw < to) return "Terskelen tilsier nivå " + next.raw + ". Trappen faller ett nivå av gangen, så dette året er nivå " + to + ".";
+  if (to === 16) return cov + " Oppsparte midler er " + mkr(next.s.liq) + ", over 100 mill. Det er kravet til generasjonsformue.";
   if (to === 15) return cov + " Oppsparte midler er " + mkr(next.s.liq) + ", fortsatt under 100 mill.";
   if (to === 14) return cov + " Det er over 150 %, kravet til Luksus FI.";
   if (to === 13) return cov + " Det er minst 100 %, kravet til Full FI.";
-  if (to === 12) {
-    let text = cov + " Det er minst 50 %, kravet til Halvveis FI.";
-    if (from < 11 && next.c.runway < 8) text += " Rullebanen er " + runwayNow + ", under kravet til nivå 11 (8 år).";
-    return text;
-  }
+  if (to === 12) return cov + " Det er minst 50 %, og rullebanen er " + runwayNow + ", så både nivå 11 og 12 er nådd.";
   if (to === 11) return "Rullebanen gikk fra " + yrs(prev.c.runway) + " til " + runwayNow + " og passerte 8 år.";
   if (to === 10) return "Oppsparte midler (" + mkr(next.s.liq) + ") ble større enn gjelden (" + mkr(next.s.debt) + ").";
   if (to === 9) return "Rullebanen er " + runwayNow + ", og oppsparte midler dekker ikke hele gjelden.";
