@@ -83,18 +83,18 @@
   .assum-page { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
   .assum-hero {
     display: grid; grid-template-columns: minmax(260px, 0.9fr) minmax(320px, 1.2fr);
-    gap: 28px; align-items: center;
+    gap: 20px; align-items: start;
     background: #fff; border: 1px solid var(--gray-200); border-radius: 16px;
-    padding: 22px 24px; position: relative; overflow: hidden;
+    padding: 12px 18px 14px; position: relative; overflow: hidden;
   }
   .assum-hero::before {
     content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--blue-main);
   }
   .assum-kicker {
-    font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--blue-main);
+    font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--blue-main);
   }
-  .assum-title { margin: 6px 0 0; font-size: 28px; font-weight: 500; letter-spacing: -.02em; line-height: 1.15; }
-  .assum-lead { margin: 8px 0 0; max-width: 42ch; font-size: 14px; line-height: 1.45; color: var(--gray-600); }
+  .assum-title { margin: 2px 0 0; font-size: 18px; font-weight: 500; letter-spacing: -.02em; line-height: 1.2; }
+  .assum-lead { margin: 4px 0 0; max-width: 46ch; font-size: 12px; line-height: 1.35; color: var(--gray-600); }
   .assum-line { position: relative; height: 8px; border-radius: 100px; background: var(--gray-100); margin: 18px 0 8px; }
   .assum-line-save, .assum-line-pay { position: absolute; top: 0; bottom: 0; border-radius: 100px; }
   .assum-line-save { background: var(--blue-main); }
@@ -367,8 +367,8 @@ function monthlyCostForNext(s, c, lvl) {
 
 const TABS = [
   { id: "forside", icon: "home-alt-2", label: "Forside" },
-  { id: "forutsetninger", icon: "cog", label: "Egne forutsetninger" },
-  { id: 0, icon: "slider-alt", label: "Kundens økonomi" },
+  { id: "forutsetninger", icon: "cog", label: "Forutsetninger" },
+  { id: 0, icon: "slider-alt", label: "Økonomi" },
   { id: 1, icon: "pie-chart-alt-2", label: "Kostnader og inntekt" },
   { id: "fremtid", icon: "calendar", label: "Fremtidige nivåer" },
   { id: 2, icon: "table", label: "Kriteriematrise" },
@@ -1748,7 +1748,7 @@ function App() {
           </div>
         </div>
       </div>
-      <div style={{ maxWidth: tab === 4 ? "none" : 1520, width: "100%", margin: "0 auto", padding: tab === 4 ? 0 : "22px 20px 28px", display: "flex", flexDirection: "column", gap: tab === 4 ? 0 : 10, minHeight: 0, flex: 1, overflow: "hidden" }}>
+      <div style={{ maxWidth: tab === 4 ? "none" : 1520, width: "100%", margin: "0 auto", padding: tab === 4 ? 0 : (tab === "forutsetninger" ? "8px 20px 28px" : "22px 20px 28px"), display: "flex", flexDirection: "column", gap: tab === 4 ? 0 : 10, minHeight: 0, flex: 1, overflow: "hidden" }}>
         {tab !== 4 && !standalone && <Hero L={L} prog={prog} />}
         <div style={{ minHeight: 0, flex: 1, overflow: tab === 4 ? "hidden" : "auto", display: "flex", flexDirection: "column", marginTop: tab === 4 || standalone ? 0 : 26 }}>
           {tab === "forside" && <TabForside onStart={() => setTab(0)} loadLevel={loadLevel} />}
