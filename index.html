@@ -62,6 +62,67 @@
     box-shadow: 0 0 0 4px var(--ring);
   }
   .nd-grid { display: grid; gap: 1px; background: var(--gray-200); border: 1px solid var(--gray-200); border-radius: 12px; overflow: hidden; }
+  .future-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 12px; align-items: start; }
+  .app-nav { display: flex; align-items: stretch; justify-content: stretch; gap: 0; min-width: 0; flex: 1; overflow: hidden; }
+  .app-tab {
+    flex: 1 1 0; min-width: 0;
+    display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+    padding: 8px 4px; background: transparent; border: none; cursor: pointer;
+    font-size: 12px; font-weight: 500; line-height: 1.15; text-align: center;
+    white-space: normal; border-bottom: 2px solid transparent;
+    transition: color .15s ease-out, border-color .15s ease-out;
+  }
+  @media (max-width: 720px) {
+    .app-nav { overflow-x: auto; }
+    .app-tab { flex: 0 0 auto; white-space: nowrap; padding: 12px 10px; }
+  }
+  @media (max-width: 900px) {
+    .future-layout { grid-template-columns: 1fr; }
+    .assum-hero, .assum-grid { grid-template-columns: 1fr; }
+  }
+  .assum-page { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+  .assum-hero {
+    display: grid; grid-template-columns: minmax(260px, 0.9fr) minmax(320px, 1.2fr);
+    gap: 28px; align-items: center;
+    background: #fff; border: 1px solid var(--gray-200); border-radius: 16px;
+    padding: 22px 24px; position: relative; overflow: hidden;
+  }
+  .assum-hero::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--blue-main);
+  }
+  .assum-kicker {
+    font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--blue-main);
+  }
+  .assum-title { margin: 6px 0 0; font-size: 28px; font-weight: 500; letter-spacing: -.02em; line-height: 1.15; }
+  .assum-lead { margin: 8px 0 0; max-width: 42ch; font-size: 14px; line-height: 1.45; color: var(--gray-600); }
+  .assum-line { position: relative; height: 8px; border-radius: 100px; background: var(--gray-100); margin: 18px 0 8px; }
+  .assum-line-save, .assum-line-pay { position: absolute; top: 0; bottom: 0; border-radius: 100px; }
+  .assum-line-save { background: var(--blue-main); }
+  .assum-line-pay { background: var(--warning-700); opacity: .85; }
+  .assum-line-dot {
+    position: absolute; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px;
+    border-radius: 50%; background: #fff; border: 2px solid var(--sp-navy); box-shadow: 0 0 0 4px rgba(10,94,220,.16);
+  }
+  .assum-line-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--gray-500); }
+  .assum-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .assum-card {
+    background: #fff; border: 1px solid var(--gray-200); border-radius: 16px; padding: 16px 16px 8px;
+  }
+  .assum-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .assum-card-ico {
+    width: 32px; height: 32px; border-radius: 10px; background: var(--blue-50);
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+  }
+  .assum-field { padding: 12px 0 10px; border-top: 1px solid var(--gray-100); }
+  .assum-field-top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: baseline; }
+  .assum-label { font-size: 13px; font-weight: 500; color: var(--sp-navy); line-height: 1.3; }
+  .assum-value { font-size: 18px; font-weight: 600; letter-spacing: -.02em; font-variant-numeric: tabular-nums; color: var(--sp-navy); white-space: nowrap; }
+  .assum-hint { min-height: 16px; margin-top: 2px; font-size: 11px; line-height: 1.35; color: var(--gray-500); }
+  input[type=range].assum-range {
+    height: 6px; margin: 10px 0 4px;
+    background: linear-gradient(90deg, var(--blue-main) var(--p, 0%), var(--gray-200) var(--p, 0%));
+  }
+  input[type=range].assum-range::-webkit-slider-thumb { width: 18px; height: 18px; }
 </style>
 </head>
 <body>
@@ -108,9 +169,9 @@ const LEVELS = [
     nesteSteg: "Egen, forutsigbar stønad eller ytelse.",
     p: { salary: 0, taxFree: 0, cost: 10000, assets: 0, debt: 0, rate: 5, liq: 20000, prate: 5 } },
   { n: 2, tittel: "Offentlig støtte", badge: "Stønad", kriterium: "Lever på ytelser",
-    beskrivelse: "Lever fullt ut på kommunal stønad eller NAV-ytelser. Forutsigbart, men uten handlingsrom.",
+    beskrivelse: "Lever på kommunal stønad eller NAV-ytelser. Forutsigbart, men uten handlingsrom.",
     nesteSteg: "Egen arbeidsinntekt.",
-    p: { salary: 0, taxFree: 280000, cost: 22000, assets: 0, debt: 0, rate: 5, liq: 15000, prate: 5 } },
+    p: { salary: 0, taxFree: 120000, cost: 22000, assets: 0, debt: 0, rate: 5, liq: 15000, prate: 5 } },
   { n: 3, tittel: "Lavinntekt", badge: "Sårbar", kriterium: "Dekning under 70 %",
     beskrivelse: "Arbeid, men inntekten dekker under 70 % av kostnadene uten subsidier. Hver uforutsett utgift blir gjeld.",
     nesteSteg: "Inntekt som dekker de faste kostnadene.",
@@ -169,7 +230,7 @@ const LEVELS = [
     p: { salary: 0, taxFree: 0, cost: 100000, assets: 30000000, debt: 0, rate: 5, liq: 130000000, prate: 5 } },
 ];
 
-const DEFAULTS = { salary: 0, taxFree: 0, cost: 10000, assets: 0, debt: 0, rate: 5, liq: 0, prate: 5 };
+const DEFAULTS = { salary: 0, taxFree: 0, cost: 10000, assets: 0, debt: 0, rate: 5, liq: 0, prate: 5, pensionCapital: 0 };
 
 function num(v) {
   const n = Number(v);
@@ -180,16 +241,23 @@ function normalize(s) {
   return {
     salary: num(s.salary), taxFree: num(s.taxFree), cost: num(s.cost),
     assets: num(s.assets), debt: num(s.debt), rate: num(s.rate),
-    liq: num(s.liq), prate: num(s.prate),
+    liq: num(s.liq), prate: num(s.prate), pensionCapital: num(s.pensionCapital),
+    ownRate: num(s.ownRate),
   };
 }
+function ownershipRate(s) {
+  const r = num(s && s.ownRate);
+  return r >= 1 ? r : 2.5;
+}
 function calc(s) {
-  const own = s.assets * 0.025;
+  const ownRate = ownershipRate(s);
+  const own = s.assets * (ownRate / 100);
   const interest = s.debt * (s.rate / 100);
   const living = s.cost * 12;
   const totalCost = living + interest + own;
-  const passive = s.liq * (s.prate / 100);
-  const income = s.salary + s.taxFree + passive;
+  const passiveFromSavings = s.liq * (s.prate / 100);
+  const passive = passiveFromSavings + s.taxFree;
+  const income = s.salary + passive;
   const surplus = (income - totalCost) / 12;
   const gross = s.assets + s.liq;
   const equity = gross === 0 ? 0 : ((gross - s.debt) / gross) * 100;
@@ -205,7 +273,7 @@ function calc(s) {
   const interestShare = income === 0 ? 0 : (interest / income) * 100;
   const passiveShare = income === 0 ? 0 : (passive / income) * 100;
   return {
-    own, interest, living, totalCost, passive, income, surplus, gross, equity, ltv,
+    own, ownRate, interest, living, totalCost, passive, passiveFromSavings, income, surplus, gross, equity, ltv,
     runway, passiveCov, debtCov, coverage, salaryShare, costOfSalary, costOfIncome,
     ownShare, interestShare, passiveShare,
   };
@@ -226,7 +294,8 @@ function horizon2(c) {
 function horizon3(s) {
   let bal = Math.max(0, s.assets + s.liq - s.debt), m = 0;
   while (bal > 0 && m < 1200) {
-    bal += bal * (s.prate / 100) / 12 - (s.cost + bal * 0.025 / 12);
+    const carry = ownershipRate(s) / 100;
+    bal += bal * (s.prate / 100) / 12 - (s.cost + bal * carry / 12);
     m++;
   }
   return m >= 1200 ? 100 : m / 12;
@@ -273,8 +342,10 @@ function nextNeed(s, c, lvl) {
   if (lvl < 11) return R[lvl + 1] * c.totalCost;
   const k = [0.5, 1.0, 1.5, 3.0, 3.0][lvl - 11];
   const r = s.prate / 100;
+  const still = k * c.totalCost - s.taxFree;
+  if (still <= 0) return 0;
   if (r === 0) return Infinity;
-  return k * c.totalCost / r;
+  return still / r;
 }
 function monthlyCostForNext(s, c, lvl) {
   if (lvl >= 16) return null;
@@ -296,8 +367,10 @@ function monthlyCostForNext(s, c, lvl) {
 
 const TABS = [
   { id: "forside", icon: "home-alt-2", label: "Forside" },
+  { id: "forutsetninger", icon: "cog", label: "Egne forutsetninger" },
   { id: 0, icon: "slider-alt", label: "Kundens økonomi" },
   { id: 1, icon: "pie-chart-alt-2", label: "Kostnader og inntekt" },
+  { id: "fremtid", icon: "calendar", label: "Fremtidige nivåer" },
   { id: 2, icon: "table", label: "Kriteriematrise" },
   { id: 3, icon: "target-lock", label: "Status og anbefalinger" },
   { id: 4, icon: "stats", label: "Normalfordeling" },
@@ -402,7 +475,7 @@ function Footnote() {
     <div style={{ background: "var(--blue-50)", border: "1px solid var(--blue-200)", borderRadius: 12, padding: "8px 14px", display: "flex", gap: 10, alignItems: "flex-start", flex: "none" }}>
       <Ico name="book-open" size={16} color="var(--blue-main)" style={{ marginTop: 1, flex: "none" }} />
       <p style={{ margin: 0, fontSize: 12, lineHeight: 1.4, color: "var(--sp-navy)" }}>
-        Modellen bruker 2,5 %-regelen for årlig eierkostnad på brutto eiendeler, faktisk rentekostnad på gjeld, og oppsparte midler som grunnlag for både passiv inntekt og rullebane. Passiv inntekt beregnes som oppsparte midler × avkastning — 20 mill. kr til 5 % gir 1 mill. kr brutto per år. Illustrasjon, ikke finansiell rådgivning.
+        Modellen bruker valgt eierkostnad på brutto eiendeler, faktisk rentekostnad på gjeld, og oppsparte midler som grunnlag for rullebane. Passiv inntekt er avkastning på oppsparte midler pluss skattefrie og andre inntekter. Avkastningen alene: 20 mill. kr til 5 % gir 1 mill. kr per år. Illustrasjon, ikke finansiell rådgivning.
       </p>
     </div>
   );
@@ -450,16 +523,147 @@ function TabForside({ onStart, loadLevel }) {
   );
 }
 
-function TabEconomy({ s, c, lvl, setField, loadLevel }) {
+const G_AMOUNT = 136549;
+const OTP_SALARY_CAP = 12 * G_AMOUNT;
+
+function otpDeposit(salary, ratePct, cap) {
+  const limit = cap == null ? OTP_SALARY_CAP : cap;
+  const base = Math.min(Math.max(0, num(salary)), limit);
+  return base * (num(ratePct) / 100);
+}
+
+const ASSUMPTIONS = { age: 45, kpi: 2.5, portfolio: 5, passiveAssets: 3, ownRate: 2.5, loanYears: 25, pension: 4.5, pensionStart: 67, otp: 0, annualSave: 0 };
+
+function AssumptionField({ label, value, min, max, step, format, hint, onChange }) {
+  const span = max - min || 1;
+  const p = Math.max(0, Math.min(100, ((value - min) / span) * 100));
+  return (
+    <div className="assum-field">
+      <div className="assum-field-top">
+        <span className="assum-label">{label}</span>
+        <span className="assum-value">{format(value)}</span>
+      </div>
+      <input
+        className="assum-range"
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        style={{ "--p": p + "%" }}
+        onChange={e => onChange(Number(e.target.value))}
+        aria-label={label}
+      />
+      <div className="assum-hint">{hint}</div>
+    </div>
+  );
+}
+
+function TabAssumptions({ a, s, c, setAssumption }) {
+  const years = v => nb(v) + " år";
+  const deposit = otpDeposit(s.salary, a.otp);
+  const age = Math.round(a.age);
+  const pensionAt = Math.round(a.pensionStart);
+  const end = 80;
+  const span = Math.max(1, end - Math.min(age, end));
+  const savePct = Math.max(0, Math.min(100, ((Math.min(pensionAt, end) - Math.min(age, end)) / span) * 100));
+  const payEnd = Math.min(end, pensionAt + 15);
+  const payPct = Math.max(0, Math.min(100 - savePct, ((payEnd - Math.min(Math.max(pensionAt, age), end)) / span) * 100));
+  const groups = [
+    {
+      title: "Livsløp", icon: "user",
+      fields: [
+        { key: "age", label: "Alder", min: 18, max: 100, step: 1, format: years, hint: "Utgangspunktet for fremskrivingen" },
+        { key: "kpi", label: "KPI", min: 0, max: 10, step: 0.1, format: pct1, hint: "Årlig prisvekst på lønn, kostnader og andre inntekter" },
+      ],
+    },
+    {
+      title: "Finansportefølje", icon: "line-chart",
+      fields: [
+        { key: "portfolio", label: "Avkastning på finansporteføljen", min: 0, max: 15, step: 0.1, format: pct1, hint: kr(s.liq) + " × " + pct1(a.portfolio).replace(" %", "") + " % = " + kr(c.passiveFromSavings) },
+        { key: "annualSave", label: "Årlig sparing", min: 0, max: 2000000, step: 10000, format: kr, hint: "Legges til porteføljen hvert år frem til pensjonen starter" },
+      ],
+    },
+    {
+      title: "Eiendom og gjeld", icon: "building-house",
+      fields: [
+        { key: "passiveAssets", label: "Avkastning på passive eiendeler", min: 0, max: 15, step: 0.1, format: pct1, hint: "Årlig verdiøkning på bolig, hytte og bil" },
+        { key: "ownRate", label: "Årlige eierkostnader", min: 1, max: 5, step: 0.1, format: pct1, hint: pct1(a.ownRate) + " av eiendeler = " + kr(s.assets * a.ownRate / 100) + " per år" },
+        { key: "loanYears", label: "Nedbetalingstid på lånet", min: 0, max: 40, step: 1, format: years, hint: "Gjelden betales ned og faller bort" },
+      ],
+    },
+    {
+      title: "Pensjon", icon: "doughnut-chart",
+      fields: [
+        { key: "pension", label: "Avkastning på pensjonskapital", min: 0, max: 15, step: 0.1, format: pct1, hint: kr(s.pensionCapital) + " × " + pct1(a.pension).replace(" %", "") + " % = " + kr(s.pensionCapital * a.pension / 100) + " per år" },
+        { key: "otp", label: "Årlig innskudd OTP", min: 0, max: 10, step: 0.1, format: pct1, hint: pct1(a.otp) + " av lønn opp til 12 G gir " + kr(deposit) + " per år" },
+        { key: "pensionStart", label: "Når starter utbetaling av pensjon", min: 50, max: 80, step: 1, format: years, hint: "Deretter passiv inntekt i 15 år, uten nye innskudd" },
+      ],
+    },
+  ];
+  return (
+    <div className="assum-page">
+      <div className="assum-hero">
+        <div>
+          <div className="assum-kicker">Egne forutsetninger</div>
+          <h2 className="assum-title">{age} år i dag. Pensjon ved {pensionAt}.</h2>
+          <p className="assum-lead">Forutsetningene styrer hvordan inntekt, formue og gjeld utvikler seg frem til 80 år. Utviklingen ser du i fanen Fremtidige nivåer.</p>
+        </div>
+        <div>
+          <div className="assum-line" aria-hidden="true">
+            <span className="assum-line-save" style={{ left: 0, width: savePct + "%" }} />
+            <span className="assum-line-pay" style={{ left: savePct + "%", width: payPct + "%" }} />
+            <span className="assum-line-dot" style={{ left: savePct + "%" }} />
+          </div>
+          <div className="assum-line-labels">
+            <span>I dag · {age} år</span>
+            <span>Pensjon · {pensionAt} år</span>
+            <span>80 år</span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 16 }}>
+            {[
+              ["Porteføljeavkastning", kr(c.passiveFromSavings)],
+              ["Årlig sparing", kr(a.annualSave)],
+              ["OTP-innskudd", kr(deposit)],
+              ["Pensjonsavkastning", pct1(a.pension)],
+            ].map(([k, v]) => (
+              <div key={k} style={{ paddingTop: 8, borderTop: "1px solid var(--gray-200)" }}>
+                <div style={{ fontSize: 11, color: "var(--gray-500)" }}>{k}</div>
+                <div style={Object.assign({ fontSize: 16, marginTop: 2 }, numStyle)}>{v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="assum-grid">
+        {groups.map(g => (
+          <section key={g.title} className="assum-card">
+            <div className="assum-card-head">
+              <span className="assum-card-ico"><Ico name={g.icon} size={16} color="var(--blue-main)" /></span>
+              <div style={{ fontSize: 15, fontWeight: 500 }}>{g.title}</div>
+            </div>
+            {g.fields.map(f => (
+              <AssumptionField key={f.key} {...f} value={a[f.key]} onChange={v => setAssumption(f.key, v)} />
+            ))}
+          </section>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TabEconomy({ s, c, a, lvl, setField, loadLevel }) {
+  const deposit = otpDeposit(s.salary, a.otp);
+  const pensionReturn = s.pensionCapital * a.pension / 100;
   const fields = [
     { key: "salary", label: "Brutto lønnsinntekt\n(årlig)", min: 0, max: 15000000, step: 50000, format: kr },
     { key: "cost", label: "Månedlige kostnader\nex. renter og avdrag", min: 10000, max: 600000, step: 1000, format: kr, hint: kr(s.cost * 12) + " per år i livsopphold" },
-    { key: "liq", label: "Oppsparte midler\n(bank, fond, aksjer)", min: 0, max: 450000000, step: 250000, format: kr, hint: "Gir " + kr(c.passive) + " i passiv inntekt per år" },
-    { key: "prate", label: "Forventet avkastning\npå oppsparte midler", min: 0, max: 12, step: 0.5, format: v => pct1(v), hint: kr(s.liq) + " × " + pct1(s.prate).replace(" %", "") + " % = " + kr(c.passive) },
-    { key: "assets", label: "Øvrige eiendeler brutto\n(bolig, hytte, bil)", min: 0, max: 150000000, step: 250000, format: kr, hint: "Eierkostnad 2,5 %: " + kr(c.own) + " per år" },
+    { key: "liq", label: "Oppsparte midler\n(bank, fond, aksjer)", min: 0, max: 450000000, step: 250000, format: kr, hint: "Gir " + kr(c.passiveFromSavings) + " i passiv inntekt per år" },
+    { key: "assets", label: "Øvrige eiendeler brutto\n(bolig, hytte, bil)", min: 0, max: 150000000, step: 250000, format: kr, hint: "Eierkostnad " + pct1(c.ownRate) + ": " + kr(c.own) + " per år" },
     { key: "debt", label: "Total gjeld", min: 0, max: 20000000, step: 100000, format: kr, hint: "Rentekostnad: " + kr(c.interest) + " per år" },
     { key: "rate", label: "Lånerente", min: 0, max: 10, step: 0.1, format: v => pct1(v), hint: "Endrer rentekostnaden direkte" },
-    { key: "taxFree", label: "Skattefrie / andre inntekter\n(årlig)", min: 0, max: 3000000, step: 10000, format: kr, hint: "Netto, utenfor lønn" },
+    { key: "taxFree", label: "Skattefrie / andre inntekter\n(årlig)", min: 0, max: 3000000, step: 10000, format: kr, hint: "Inngår i passiv inntekt" },
+    { key: "pensionCapital", label: "Pensjonskapital (OPT)", min: 0, max: 10000000, step: 100000, format: kr, hint: "Tilføres " + kr(deposit) + " i OTP og " + kr(pensionReturn) + " i avkastning per år" },
   ];
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 6, minHeight: 0, flex: 1 }}>
@@ -475,7 +679,7 @@ function TabEconomy({ s, c, lvl, setField, loadLevel }) {
       </div>
       <div style={card({ padding: 16 })}>
         <div style={{ fontSize: 16, fontWeight: 500, letterSpacing: "-.01em" }}>Kundens økonomi</div>
-        <div style={{ fontSize: 12, color: "var(--gray-500)", margin: "2px 0 4px" }}>Alle beløp i NOK. Passiv inntekt beregnes som avkastning på oppsparte midler.</div>
+        <div style={{ fontSize: 12, color: "var(--gray-500)", margin: "2px 0 4px" }}>Alle beløp i NOK. Passiv inntekt er avkastning på oppsparte midler pluss skattefrie og andre inntekter.</div>
         <div className="sliders-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", columnGap: 24, rowGap: 4 }}>
           {fields.map(f => (
             <RangeField key={f.key} {...f} value={s[f.key]} onChange={v => setField(f.key, v)} />
@@ -497,12 +701,12 @@ function TabEconomy({ s, c, lvl, setField, loadLevel }) {
   );
 }
 
-function Doughnut({ living, interest, own, total }) {
+function Doughnut({ living, interest, own, total, ownRate }) {
   const r = 68, C = 2 * Math.PI * r, sw = 40;
   const parts = [
     { v: Math.max(0, living), color: "var(--chart-blue)", label: "Livsopphold" },
     { v: Math.max(0, interest), color: "var(--chart-navy)", label: "Rentekostnad" },
-    { v: Math.max(0, own), color: "var(--blue-400)", label: "Eierkostnad 2,5 %" },
+    { v: Math.max(0, own), color: "var(--blue-400)", label: "Eierkostnad " + pct1(ownRate) },
   ];
   const sum = parts.reduce((a, p) => a + p.v, 0) || 1;
   let acc = 0;
@@ -543,7 +747,7 @@ function Doughnut({ living, interest, own, total }) {
 
 function BarChart({ s, c }) {
   const bars = [
-    { label: "Lønn og andre inntekter", v: s.salary + s.taxFree, color: "var(--chart-blue)" },
+    { label: "Lønnsinntekt", v: s.salary, color: "var(--chart-blue)" },
     { label: "Passiv inntekt", v: c.passive, color: "var(--blue-400)" },
     { label: "Totale inntekter", v: c.income, color: "var(--chart-navy)" },
     { label: "Totale kostnader", v: c.totalCost, color: "var(--secondary-500)" },
@@ -586,13 +790,278 @@ function Metric({ label, value, sub, color }) {
   );
 }
 
+function annuityPayment(capital, rate, years) {
+  if (!(capital > 0) || !(years > 0)) return 0;
+  if (!(rate > 0)) return capital / years;
+  return capital * rate / (1 - Math.pow(1 + rate, -years));
+}
+function payDownDebt(debt, ratePct, yearsLeft) {
+  if (!(debt > 0) || !(yearsLeft > 0)) return 0;
+  const r = ratePct / 100;
+  const interest = debt * r;
+  const payment = r === 0 ? debt / yearsLeft : debt * r / (1 - Math.pow(1 + r, -yearsLeft));
+  const principal = Math.min(debt, Math.max(0, payment - interest));
+  const next = debt - principal;
+  return next < 1 ? 0 : next;
+}
+function projectFuture(s, a) {
+  const startAge = Math.round(num(a.age));
+  const endAge = Math.max(startAge, 80);
+  const kpi = num(a.kpi) / 100;
+  const port = num(a.portfolio) / 100;
+  const passRet = num(a.passiveAssets) / 100;
+  const penRet = num(a.pension) / 100;
+  const pensionStart = Math.round(num(a.pensionStart));
+  const payoutSpan = 15;
+  let salary = s.salary, taxFree = s.taxFree, cost = s.cost, assets = s.assets, debt = s.debt, liq = s.liq;
+  let pensionCapital = s.pensionCapital;
+  let yearsLeft = num(a.loanYears);
+  let gCap = OTP_SALARY_CAP;
+  let pmt = 0;
+  let paying = false;
+  const points = [];
+  const snap = (age, deposit, payout, saved) => {
+    const state = normalize({
+      salary, taxFree: taxFree + payout, cost, assets, debt, rate: s.rate, liq, prate: a.portfolio,
+      pensionCapital, ownRate: a.ownRate,
+    });
+    const c = calc(state);
+    const lvl = evaluate(state, c);
+    let phase = "sparing";
+    if (age >= pensionStart && age < pensionStart + payoutSpan) phase = "utbetaling";
+    else if (age >= pensionStart + payoutSpan) phase = "etter pensjon";
+    points.push({
+      age, lvl, phase, deposit, payout, pensionCapital, saved,
+      s: state, c, L: LEVELS[lvl],
+    });
+  };
+  const inPayout = (age) => age >= pensionStart && age < pensionStart + payoutSpan;
+  snap(startAge, startAge < pensionStart ? otpDeposit(salary, a.otp, gCap) : 0, 0, 0);
+  for (let age = startAge + 1; age <= endAge; age++) {
+    const grow = 1 + kpi;
+    const saved = age < pensionStart ? Math.max(0, num(a.annualSave)) : 0;
+    salary *= grow;
+    cost *= grow;
+    taxFree *= grow;
+    liq = liq * (1 + port) + saved;
+    assets *= (1 + passRet);
+    gCap *= grow;
+    debt = payDownDebt(debt, s.rate, yearsLeft);
+    yearsLeft = Math.max(0, yearsLeft - 1);
+    let deposit = 0;
+    let payout = 0;
+    if (inPayout(age)) {
+      if (!paying) {
+        const n = pensionStart + payoutSpan - age;
+        pmt = annuityPayment(pensionCapital, penRet, n);
+        paying = true;
+      }
+      payout = pmt;
+      pensionCapital = Math.max(0, pensionCapital * (1 + penRet) - pmt);
+    } else if (age < pensionStart) {
+      deposit = otpDeposit(salary, a.otp, gCap);
+      pensionCapital = pensionCapital * (1 + penRet) + deposit;
+    } else {
+      paying = false;
+      pmt = 0;
+      pensionCapital = pensionCapital * (1 + penRet);
+    }
+    snap(age, deposit, payout, saved);
+  }
+  if (startAge <= 80) return points.filter(p => p.age <= 80);
+  return points.slice(0, 1);
+}
+
+function TabFuture({ s, a }) {
+  const points = projectFuture(s, a);
+  const [idx, setIdx] = useState(0);
+  const [pinned, setPinned] = useState(false);
+  const i = Math.max(0, Math.min(idx, points.length - 1));
+  const p = points[i];
+  const startAge = points[0].age;
+  const pensionStart = Math.round(num(a.pensionStart));
+  const W = 800, H = 340;
+  const pad = { l: 42, r: 16, t: 20, b: 34 };
+  const plotW = W - pad.l - pad.r;
+  const plotH = H - pad.t - pad.b;
+  const n = points.length;
+  const x = (k) => pad.l + (n <= 1 ? plotW / 2 : (k / (n - 1)) * plotW);
+  const y = (lvl) => pad.t + (1 - lvl / 16) * plotH;
+  const base = y(0);
+  let line = "";
+  points.forEach((pt, k) => {
+    line += (k === 0 ? "M " : " H ") + x(k) + (k === 0 ? " " : " V ") + y(pt.lvl);
+  });
+  const area = n > 1 ? line + " L " + x(n - 1) + " " + base + " L " + x(0) + " " + base + " Z" : "";
+  const ticks = [];
+  points.forEach((pt) => {
+    if (pt.age === startAge || pt.age === points[n - 1].age || pt.age % 5 === 0) ticks.push(pt);
+  });
+  const jump = (age) => {
+    let best = 0;
+    points.forEach((pt, k) => {
+      if (Math.abs(pt.age - age) < Math.abs(points[best].age - age)) best = k;
+    });
+    setIdx(best);
+  };
+  const pickFromEvent = (e) => {
+    const svg = e.currentTarget;
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX;
+    pt.y = e.clientY;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return;
+    const loc = pt.matrixTransform(ctm.inverse());
+    let best = 0, bestD = Infinity;
+    points.forEach((_, k) => {
+      const d = Math.abs(x(k) - loc.x);
+      if (d < bestD) { best = k; bestD = d; }
+    });
+    setIdx(best);
+  };
+  const zones = [
+    { from: 0, to: 4, fill: "rgba(180,35,24,0.045)" },
+    { from: 4, to: 10, fill: "rgba(10,94,220,0.045)" },
+    { from: 10, to: 16, fill: "rgba(6,118,71,0.06)" },
+  ];
+  const pensionIdx = points.findIndex(pt => pt.age === pensionStart);
+  const payoutEnd = pensionStart + 14;
+  const bandStart = points.findIndex(pt => pt.age >= pensionStart);
+  const bandEnd = points.findIndex(pt => pt.age >= Math.min(points[n - 1].age, payoutEnd));
+  const bandX = (k, edge) => {
+    if (k <= 0) return edge === "start" ? pad.l : x(0);
+    if (k >= n - 1) return edge === "end" ? W - pad.r : x(n - 1);
+    return edge === "start" ? (x(k - 1) + x(k)) / 2 : (x(k) + x(k + 1)) / 2;
+  };
+  const rows = [
+    ["Passiv inntekt", kr(p.c.passive), p.payout > 0 ? "Inkluderer " + kr(p.payout) + " i pensjon" : "Dekker " + pct(p.c.passiveCov) + " av kostnadene"],
+    ["Pensjonsutbetaling", kr(p.payout), p.phase === "utbetaling" ? (p.payout > 0 ? "Passiv inntekt i 15 år fra " + pensionStart + " år" : "Ingen pensjonskapital å utbetale") : "Starter ved " + pensionStart + " år"],
+    ["Årlige kostnader", kr(p.c.totalCost), "Livsopphold " + kr(p.c.living) + " følger KPI " + pct1(a.kpi)],
+    ["Eiendeler", kr(p.s.assets), "Følger " + pct1(a.passiveAssets) + " avkastning"],
+    ["Gjeld", p.s.debt === 0 ? "Gjeldfri" : kr(p.s.debt), p.s.debt === 0 ? "Nedbetalt etter planen" : "Nedbetales over " + nb(a.loanYears) + " år og faller bort"],
+    ["Oppsparte midler", kr(p.s.liq), pct1(a.portfolio) + " avkastning" + (p.saved > 0 ? " pluss " + kr(p.saved) + " i sparing" : (p.age >= pensionStart && a.annualSave > 0 ? ". Årlig sparing er stoppet" : ""))],
+    ["Pensjonskapital", kr(p.pensionCapital), p.phase === "utbetaling" ? "Tappes over utbetalingsperioden" : pct1(a.pension) + " avkastning"],
+  ];
+  return (
+    <div className="future-layout">
+      <div style={card({ padding: 16, minWidth: 0 })}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "flex-start", flexWrap: "wrap" }}>
+          <div style={{ maxWidth: 560 }}>
+            <div style={{ fontSize: 16, fontWeight: 500, letterSpacing: "-.01em" }}>Fremtidige nivåer</div>
+            <div style={{ fontSize: 12, color: "var(--gray-500)", marginTop: 4, lineHeight: 1.45 }}>
+              Fra {startAge} år til 80 år. Eiendeler følger avkastningen på passive eiendeler. Gjelden nedbetales etter planen og faller bort. Årlige kostnader KPI-justeres. Pensjon blir passiv inntekt i 15 år fra pensjonsalder.
+            </div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={Object.assign({ fontSize: 32, lineHeight: 1 }, numStyle)}>Nivå {p.lvl}</div>
+            <div style={{ fontSize: 13, color: "var(--gray-600)", marginTop: 2 }}>{p.L.tittel} · {p.age} år</div>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", margin: "12px 0 8px" }}>
+          <Btn primary={i === 0} onClick={() => jump(startAge)}>I dag ({startAge} år)</Btn>
+          {pensionStart >= startAge && pensionStart <= 80 && (
+            <Btn primary={p.age === pensionStart} onClick={() => jump(pensionStart)}>Pensjon ({pensionStart} år)</Btn>
+          )}
+          <Btn primary={i === n - 1} onClick={() => jump(80)}>80 år</Btn>
+          {pinned && <Btn onClick={() => setPinned(false)}>Løsne</Btn>}
+        </div>
+        <svg
+          className="future-chart"
+          viewBox={"0 0 " + W + " " + H}
+          width="100%"
+          role="img"
+          aria-label={"Nivå fra alder " + startAge + " til 80"}
+          tabIndex={0}
+          style={{ display: "block", cursor: "crosshair", touchAction: "none" }}
+          onMouseMove={(e) => { if (!pinned) pickFromEvent(e); }}
+          onClick={(e) => { pickFromEvent(e); setPinned(true); }}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowRight") { setIdx(Math.min(n - 1, i + 1)); e.preventDefault(); }
+            if (e.key === "ArrowLeft") { setIdx(Math.max(0, i - 1)); e.preventDefault(); }
+          }}
+        >
+          <defs>
+            <linearGradient id="lvlFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#0A5EDC" stopOpacity="0.28" />
+              <stop offset="100%" stopColor="#0A5EDC" stopOpacity="0.02" />
+            </linearGradient>
+          </defs>
+          {zones.map(z => (
+            <rect key={z.from} x={pad.l} y={y(z.to)} width={plotW} height={y(z.from) - y(z.to)} fill={z.fill} />
+          ))}
+          {[0, 4, 8, 12, 16].map(lvl => (
+            <g key={lvl}>
+              <line x1={pad.l} x2={W - pad.r} y1={y(lvl)} y2={y(lvl)} stroke="var(--gray-200)" strokeWidth="1" />
+              <text x={pad.l - 8} y={y(lvl) + 4} textAnchor="end" fontSize="11" fill="var(--gray-500)">{lvl}</text>
+            </g>
+          ))}
+          {pensionIdx >= 0 && bandStart >= 0 && bandEnd >= bandStart && (
+            <rect
+              x={bandX(bandStart, "start")}
+              y={pad.t}
+              width={Math.max(0, bandX(bandEnd, "end") - bandX(bandStart, "start"))}
+              height={plotH}
+              fill="rgba(181,71,8,0.08)"
+            />
+          )}
+          {pensionIdx >= 0 && (
+            <g>
+              <line x1={x(pensionIdx)} x2={x(pensionIdx)} y1={pad.t} y2={base} stroke="var(--warning-700)" strokeDasharray="4 4" strokeWidth="1.25" />
+              <text x={x(pensionIdx)} y={pad.t - 6} textAnchor="middle" fontSize="11" fill="var(--warning-700)">Pensjon</text>
+            </g>
+          )}
+          {area && <path d={area} fill="url(#lvlFill)" />}
+          {n > 1 && <path d={line} fill="none" stroke="var(--blue-main)" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />}
+          <line x1={x(i)} x2={x(i)} y1={pad.t} y2={base} stroke="var(--sp-navy)" strokeOpacity="0.35" strokeWidth="1" />
+          <circle cx={x(i)} cy={y(p.lvl)} r="6" fill="#fff" stroke="var(--blue-main)" strokeWidth="2.5" />
+          {ticks.map(pt => {
+            const k = points.indexOf(pt);
+            return (
+              <text key={pt.age} x={x(k)} y={H - 10} textAnchor="middle" fontSize="11" fill={pt.age === p.age ? "var(--sp-navy)" : "var(--gray-500)"} fontWeight={pt.age === p.age ? 600 : 400}>{pt.age}</text>
+            );
+          })}
+        </svg>
+        <input
+          type="range"
+          min={0}
+          max={Math.max(0, n - 1)}
+          step={1}
+          value={i}
+          onChange={e => { setIdx(Number(e.target.value)); setPinned(true); }}
+          aria-label="Velg alder"
+          style={{ marginTop: 4 }}
+        />
+      </div>
+      <div style={card({ padding: 16 })}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 }}>
+          <Eyebrow>{p.age === startAge ? "I dag" : p.phase === "utbetaling" ? "Pensjon utbetales" : p.phase === "etter pensjon" ? "Etter utbetaling" : "Fremtidig år"}</Eyebrow>
+          <span style={{ fontSize: 12, color: "var(--gray-500)" }}>{pinned ? "Festet" : "Følger pekeren"}</span>
+        </div>
+        <div style={{ fontSize: 20, fontWeight: 500, margin: "6px 0 2px" }}>{p.L.tittel}</div>
+        <div style={{ fontSize: 12, color: "var(--gray-500)", lineHeight: 1.4, minHeight: 34 }}>{p.L.kriterium}</div>
+        <div style={{ marginTop: 8 }}>
+          {rows.map(([label, value, sub]) => (
+            <div key={label} style={{ padding: "8px 0", borderTop: "1px solid var(--gray-100)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                <span style={{ fontSize: 12, color: "var(--gray-500)" }}>{label}</span>
+                <span style={Object.assign({ fontSize: 13 }, numStyle)}>{value}</span>
+              </div>
+              <div style={{ fontSize: 11, color: "var(--gray-400)", marginTop: 2 }}>{sub}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TabCosts({ s, c }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10, minHeight: 0, flex: 1 }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 420px), 1fr))", gap: 10 }}>
         <div style={card({ padding: 14 })}>
           <div style={{ fontSize: 15, fontWeight: 500, letterSpacing: "-.01em", marginBottom: 8 }}>Sammensetning av totale årlige kostnader</div>
-          <Doughnut living={c.living} interest={c.interest} own={c.own} total={c.totalCost} />
+          <Doughnut living={c.living} interest={c.interest} own={c.own} total={c.totalCost} ownRate={c.ownRate} />
         </div>
         <div style={card({ padding: 14 })}>
           <div style={{ fontSize: 15, fontWeight: 500, letterSpacing: "-.01em", marginBottom: 4 }}>Inntekt mot totale årlige kostnader</div>
@@ -605,14 +1074,14 @@ function TabCosts({ s, c }) {
           <Metric label="Gjeldsgrad av brutto eiendeler" value={s.debt === 0 ? "Gjeldfri" : pct(c.ltv)} sub={kr(s.debt) + " i gjeld"} />
           <Metric label="Lønnsinntekt i % av totale inntekter" value={pct(c.salaryShare)}
             sub={c.salaryShare > 80 ? "Høy avhengighet av lønn" : "Lønnens andel av inntektene"} />
-          <Metric label="Passiv inntekt i % av totale inntekter" value={pct(c.passiveShare)} sub="Avkastning på oppsparte midler" />
+          <Metric label="Passiv inntekt i % av totale inntekter" value={pct(c.passiveShare)} sub="Avkastning og skattefrie inntekter" />
           <Metric label="Kostnader i % av lønnsinntekt" value={s.salary === 0 ? "Ingen lønn" : pct(c.costOfSalary)}
             color={!Number.isFinite(c.costOfSalary) ? undefined : (c.costOfSalary > 100 ? "var(--error-700)" : "var(--success-700)")}
             sub="Under 100 % betyr at lønnen bærer kostnadene" />
           <Metric label="Kostnader i % av totale inntekter" value={pct(c.costOfIncome)} sub="Samlet dekning inkludert passiv inntekt" />
           <Metric label="Eierkostnad i % av totale inntekter" value={pct(c.ownShare)}
             color={c.ownShare > 25 ? "var(--warning-700)" : undefined}
-            sub="2,5 % av brutto eiendeler" />
+            sub={pct1(c.ownRate) + " av brutto eiendeler"} />
           <Metric label="Rentekostnad i % av totale inntekter" value={pct(c.interestShare)}
             color={c.interestShare > 25 ? "var(--warning-700)" : undefined}
             sub={s.debt === 0 ? "Ingen gjeld" : "Faktisk rente på total gjeld"} />
@@ -761,7 +1230,9 @@ function TabStatus({ s, c, lvl, L, prog }) {
   const freed = c.living * 0.1;
   const mNext = monthlyCostForNext(s, c, lvl);
   const yearsToClose = c.surplus > 0 && gap > 0 ? gap / (c.surplus * 12) : null;
-  const fiNeed = s.prate > 0 ? c.totalCost / (s.prate / 100) : Infinity;
+  const rate = s.prate / 100;
+  const stillForFi = Math.max(0, c.totalCost - s.taxFree);
+  const fiNeed = stillForFi === 0 ? 0 : (rate > 0 ? stillForFi / rate : Infinity);
   const plus1rate = s.debt * 0.01;
 
   const costPoints = [
@@ -794,7 +1265,11 @@ function TabStatus({ s, c, lvl, L, prog }) {
     "Dagens midler gir " + yrs(horizon1(s, c)) + " uten lønn (horisont 1). Selges alt, er horisonten " + yrs(horizon3(s)) + " (horisont 3).",
   ];
   const incPoints = [
-    "Passiv inntekt er " + kr(c.passive) + " per år ved " + pct1(s.prate) + " avkastning og dekker " + pct(c.passiveCov) + " av kostnadene.",
+    "Passiv inntekt er " + kr(c.passive) + " per år"
+      + (s.taxFree > 0
+        ? " (" + kr(c.passiveFromSavings) + " fra oppsparte midler ved " + pct1(s.prate) + " og " + kr(s.taxFree) + " i skattefrie inntekter)"
+        : " ved " + pct1(s.prate) + " avkastning")
+      + " og dekker " + pct(c.passiveCov) + " av kostnadene.",
     "Full frihet (100 % dekning) krever " + (Number.isFinite(fiNeed) ? kr(fiNeed) : "positiv avkastning") + " i oppsparte midler ved dagens avkastning.",
     "Lønn utgjør " + pct(c.salaryShare) + " av totale inntekter." + (c.salaryShare > 80 ? " Avhengigheten av lønn er høy." : ""),
   ];
@@ -1239,14 +1714,17 @@ RKEYS.forEach(k => {
 
 function App() {
   const [tab, setTab] = useState("forside");
+  const [assumptions, setAssumptions] = useState(ASSUMPTIONS);
   const [raw, setRaw] = useState(LEVELS[10].p);
-  const s = normalize(Object.assign({}, DEFAULTS, raw));
+  const s = normalize(Object.assign({}, DEFAULTS, raw, { prate: assumptions.portfolio, ownRate: assumptions.ownRate }));
   const c = calc(s);
   const lvl = evaluate(s, c);
   const L = LEVELS[lvl];
   const prog = progress(lvl, c);
   const setField = (k, v) => setRaw(prev => Object.assign({}, normalize(prev), { [k]: v }));
+  const setAssumption = (k, v) => setAssumptions(prev => Object.assign({}, prev, { [k]: v }));
   const loadLevel = n => setRaw(LEVELS[n].p);
+  const standalone = tab === "forside" || tab === "forutsetninger";
 
   return (
     <div style={{ height: "100%", display: "flex", flexDirection: "column", overflow: "hidden", background: "var(--gray-50)", color: "var(--sp-navy)" }}>
@@ -1255,19 +1733,15 @@ function App() {
           <div style={{ display: "flex", alignItems: "center", minWidth: 0, flex: "none" }}>
             <img src="assets/spwm-logo.svg" alt="Söderberg & Partners Wealth Management" height="22" style={{ height: 22, width: "auto", display: "block" }} />
           </div>
-          <div style={{ display: "flex", gap: 2, overflowX: "auto", flex: 1, justifyContent: "center" }}>
+          <div className="app-nav">
             {TABS.map(t => {
               const on = tab === t.id;
               return (
-                <button key={t.id} onClick={() => setTab(t.id)} style={{
-                  display: "inline-flex", alignItems: "center", gap: 6, padding: "14px 14px",
-                  background: "transparent", border: "none", cursor: "pointer",
+                <button key={t.id} onClick={() => setTab(t.id)} className="app-tab" style={{
                   color: on ? "var(--blue-main)" : "var(--gray-500)",
-                  fontSize: 13, fontWeight: 500, whiteSpace: "nowrap",
-                  borderBottom: on ? "2px solid var(--blue-main)" : "2px solid transparent",
-                  transition: "color .15s ease-out, border-color .15s ease-out",
+                  borderBottomColor: on ? "var(--blue-main)" : "transparent",
                 }}>
-                  <Ico name={t.icon} size={16} /> {t.label}
+                  <Ico name={t.icon} size={15} /> {t.label}
                 </button>
               );
             })}
@@ -1275,16 +1749,18 @@ function App() {
         </div>
       </div>
       <div style={{ maxWidth: tab === 4 ? "none" : 1520, width: "100%", margin: "0 auto", padding: tab === 4 ? 0 : "22px 20px 28px", display: "flex", flexDirection: "column", gap: tab === 4 ? 0 : 10, minHeight: 0, flex: 1, overflow: "hidden" }}>
-        {tab !== 4 && tab !== "forside" && <Hero L={L} prog={prog} />}
-        <div style={{ minHeight: 0, flex: 1, overflow: tab === 4 ? "hidden" : "auto", display: "flex", flexDirection: "column", marginTop: tab === 4 || tab === "forside" ? 0 : 26 }}>
+        {tab !== 4 && !standalone && <Hero L={L} prog={prog} />}
+        <div style={{ minHeight: 0, flex: 1, overflow: tab === 4 ? "hidden" : "auto", display: "flex", flexDirection: "column", marginTop: tab === 4 || standalone ? 0 : 26 }}>
           {tab === "forside" && <TabForside onStart={() => setTab(0)} loadLevel={loadLevel} />}
-          {tab === 0 && <TabEconomy s={s} c={c} lvl={lvl} setField={setField} loadLevel={loadLevel} />}
+          {tab === "forutsetninger" && <TabAssumptions a={assumptions} s={s} c={c} setAssumption={setAssumption} />}
+          {tab === 0 && <TabEconomy s={s} c={c} a={assumptions} lvl={lvl} setField={setField} loadLevel={loadLevel} />}
           {tab === 1 && <TabCosts s={s} c={c} />}
+          {tab === "fremtid" && <TabFuture s={s} a={assumptions} />}
           {tab === 2 && <TabMatrix s={s} c={c} lvl={lvl} loadLevel={loadLevel} />}
           {tab === 3 && <TabStatus s={s} c={c} lvl={lvl} L={L} prog={prog} />}
           {tab === 4 && <TabNormal clientLvl={lvl} />}
         </div>
-        {tab !== 4 && tab !== "forside" && <Footnote />}
+        {tab !== 4 && !standalone && <Footnote />}
       </div>
     </div>
   );
